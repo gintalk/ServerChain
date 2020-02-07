@@ -1,0 +1,8 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}Copyright (c) 2012-2016 by Zalo Group.
+${licensePrefix}All Rights Reserved.
+<#if licenseLast??>
+${licenseLast}
+</#if>
