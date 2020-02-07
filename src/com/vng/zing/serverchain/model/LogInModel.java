@@ -7,16 +7,20 @@ package com.vng.zing.serverchain.model;
 import com.vng.zing.configer.ZConfig;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.resource.thrift.Authenticator;
+import com.vng.zing.resource.thrift.InvalidTokenException;
+import com.vng.zing.resource.thrift.User;
 import com.vng.zing.stats.Profiler;
 import com.vng.zing.stats.ThreadProfiler;
 import com.vng.zing.thriftpool.TClientFactory;
+import com.vng.zing.thriftpool.TClientPoolConfig;
 import com.vng.zing.thriftserver.ThriftServers;
 import com.vng.zing.thriftserver.ThriftServers.Config;
-import java.util.logging.Level;
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
+import org.apache.thrift.TServiceClientFactory;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TMultiplexedProtocol;
 import org.apache.thrift.transport.TSSLTransportFactory;
@@ -80,7 +84,38 @@ public class LogInModel extends BaseModel{
         */
         
         try{
-            Authenticator.Client authClient = new TClientFactory();
+//            TBinaryProtocol.Factory binProtFactory = new TBinaryProtocol.Factory();
+            Authenticator.Client.Factory authClientFactory = new Authenticator.Client.Factory();
+            TClientPoolConfig.ConnConfig connConfig = new TClientPoolConfig.ConnConfig(
+                _config.host, _config.port, _config.framed, false, 50000, _config.maxFrameSize, _config.encryptVersionPriority
+            );
+            
+            TClientFactory clientFactory = new TClientFactory(authClientFactory, connConfig);
+            Authenticator.Client authClient = (Authenticator.Client) clientFactory.makeObject();
+            
+            User user = authClient.authenticate(
+                request.getParameter("username"),
+                request.getParameter("password")
+            );
+            
+            request.getSession(true).setAttribute("user", user);
+            
+            clientFactory.destroyObject(authClient);
+            response.sendRedirect("/user/info");
+        }
+        catch(InvalidTokenException ex){
+            try{
+                response.sendRedirect("/");
+            }
+            catch(IOException ioEx){
+                _Logger.error(ioEx.getMessage(), ioEx);
+            }
+        }
+        catch(IOException | TException ex){
+            _Logger.error(ex.getMessage(), ex);
+        }
+        catch(Exception ex){
+            _Logger.error(ex.getMessage(), ex);
         }
     }
 }

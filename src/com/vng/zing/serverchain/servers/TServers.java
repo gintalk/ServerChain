@@ -5,6 +5,8 @@
 package com.vng.zing.serverchain.servers;
 
 import com.vng.zing.calc.thrift.Calc;
+import com.vng.zing.resource.thrift.Authenticator;
+import com.vng.zing.serverchain.handlers.TAuthenticatorHandler;
 import com.vng.zing.thriftserver.ThriftServers;
 import com.vng.zing.serverchain.handlers.TCalcHandler;
 
@@ -16,7 +18,7 @@ public class TServers {
 
 	public boolean setupAndStart() {
 		ThriftServers servers = new ThriftServers(System.getProperty("name"));
-		Calc.Processor processor = new Calc.Processor(new TCalcHandler());
+		Authenticator.Processor processor = new Authenticator.Processor(new TAuthenticatorHandler());
 		servers.setup(processor);
 		return servers.start();
 	}

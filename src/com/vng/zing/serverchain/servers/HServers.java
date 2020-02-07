@@ -5,6 +5,7 @@
 package com.vng.zing.serverchain.servers;
 
 import com.vng.zing.jettyserver.WebServers;
+import com.vng.zing.serverchain.handlers.LogInHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -31,7 +32,7 @@ public class HServers {
                 holder.setInitParameter("dirAllowed", "true");
                 
                 contextHandler.addServlet(holder, "/");
-//                contextHandler.addServlet(LogInServlet.class, "/account/login");
+                contextHandler.addServlet(LogInHandler.class, "/account/login");
 //                contextHandler.addServlet(ShowInfoServlet.class, "/user/info");
 //                contextHandler.addServlet(LogOutServlet.class, "/user/logout");
 //                contextHandler.addServlet(UpgradeServlet.class, "/user/upgrade");

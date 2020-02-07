@@ -5,6 +5,7 @@
 package com.vng.zing.serverchain.handlers;
 
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.serverchain.model.LogInModel;
 import com.vng.zing.stats.Profiler;
 import com.vng.zing.stats.ThreadProfiler;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class LogInHandler extends HttpServlet{
         this.doProcess(request, response);
     }
     
-    private void doProcess(HttpServletRequest request, HttpServletResponse response){
+    private void doProcess(HttpServletRequest request, HttpServletResponse response) throws IOException{
         ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("LogInHandler", request);
         
         try{
