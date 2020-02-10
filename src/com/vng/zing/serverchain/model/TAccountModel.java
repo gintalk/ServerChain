@@ -82,4 +82,21 @@ public class TAccountModel {
             _Logger.error(sqle);
         }
     }
+    
+    public void remove(int uId) throws InvalidTokenException, TException{
+        try(
+            Connection authCon = Utils.getAuthDBConnection();
+            PreparedStatement authStm = authCon.prepareStatement("DELETE FROM "
+                    + "UserToken WHERE id=?");
+        ){
+            authStm.setInt(1, uId);
+            
+            if(authStm.executeUpdate() == 0){
+                throw new InvalidTokenException("User number " + uId + " does not exist");
+            }
+        }
+        catch(SQLException sqle){
+            _Logger.error(sqle);
+        }
+    }
 }

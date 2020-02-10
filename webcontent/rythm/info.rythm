@@ -1,4 +1,15 @@
 <!DOCTYPE html>
+
+@args(){
+	String name,
+	String id,
+	String type,
+	String joinDate,
+	String profilePic,
+	String privilege,
+	String privilegePath,
+} 
+
 <html lang="en">
 <head>
 	<title>You're here</title>
@@ -32,7 +43,7 @@
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-md-8 text-md-right header-buttons">
-					<a href="__privilege_path__" class="site-btn">__privilege__</a>
+					<a href="@privilegePath" class="site-btn">@privilege</a>
 					<a href="/user/logout" class="site-btn">Logout</a>
 				</div>
 			</div>
@@ -48,21 +59,21 @@
 					<div class="row">
 						<div class="col-lg-6">
 							<div class="hero-text">
-								<h2>__name__</h2>
+								<h2>@name</h2>
 							</div>
 							<div class="hero-info">
 								<h2>General Info</h2>
 								<ul>
-									<li><span>ID</span>__id__</li>
-									<li><span>Name</span>__name__</li>
-									<li><span>Privilege</span>__type__</li>
-									<li><span>Join date</span>__joinDate__</li>
+									<li><span>ID</span>@id</li>
+									<li><span>Name</span>@name</li>
+									<li><span>Privilege</span>@type</li>
+									<li><span>Join date</span>@joinDate</li>
 								</ul>
 							</div>
 						</div>
 						<div class="col-lg-6">
 							<figure class="hero-image">
-								<img src="/images/__avatar__.jpg" alt="5">
+								<img src="/images/@profilePic" alt="5">
 							</figure>
 						</div>
 					</div>

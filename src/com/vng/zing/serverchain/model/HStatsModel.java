@@ -21,12 +21,12 @@ import org.apache.log4j.Logger;
  *
  * @author namnq
  */
-public class TrackModel extends BaseModel {
+public class HStatsModel extends BaseModel {
 
-	private static final Logger _Logger = ZLogger.getLogger(TrackModel.class);
-	public static final TrackModel Instance = new TrackModel();
+	private static final Logger _Logger = ZLogger.getLogger(HStatsModel.class);
+	public static final HStatsModel Instance = new HStatsModel();
 
-	private TrackModel() {
+	private HStatsModel() {
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class TrackModel extends BaseModel {
 			out = resp.getWriter();
 			///TODO..
 			profiler.push(this.getClass(), "output");
-			out.println("You are accessing /track");
+			out.println("You are accessing /stats");
 			profiler.pop(this.getClass(), "output");
 		} catch (Exception ex) {
 			_Logger.error(null, ex);

@@ -32,7 +32,7 @@ exception DatabaseException{
     1: string message;
 }
 
-service App{
+service Application{
     User upgrade(1: User user) throws(1: DatabaseException dbe);
     string showInfo(1: User user) throws(1: DatabaseException dbe);
 }

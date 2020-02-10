@@ -32,14 +32,14 @@ import org.apache.thrift.transport.TTransportException;
  *
  * @author namnh16
  */
-public class LogInModel extends BaseModel{
-    private static final Logger _Logger = ZLogger.getLogger(LogInModel.class);
-    public static final LogInModel INSTANCE = new LogInModel();
+public class HLogInModel extends BaseModel{
+    private static final Logger _Logger = ZLogger.getLogger(HLogInModel.class);
+    public static final HLogInModel INSTANCE = new HLogInModel();
     
     private final Config _config = new Config();
-    private final String _name = System.getProperty("name");
+    private final String _name = "Authenticator";
     
-    private LogInModel(){
+    private HLogInModel(){
         
     }
     
@@ -48,10 +48,10 @@ public class LogInModel extends BaseModel{
         ThreadProfiler profiler = Profiler.getThreadProfiler();
         this.prepareHeaderHtml(response);
         
-        _config.host = ZConfig.Instance.getString(ThriftServers.class, _name, "host", "0.0.0.0");
-        _config.port = ZConfig.Instance.getInt(ThriftServers.class, _name, "port", 8090);
+        _config.host = ZConfig.Instance.getString(ThriftServers.class, _name, "host", "127.0.0.1");
+        _config.port = ZConfig.Instance.getInt(ThriftServers.class, _name, "port", 8088);
         
-        /* Switch to this block if HTTPS is in use
+        /* Switch to this block if servers are running on top of HTTPS
         TSSLTransportFactory.TSSLTransportParameters params =
             new TSSLTransportFactory.TSSLTransportParameters();
         params.setTrustStore("src/main/resources/truststore.jks", "password");
@@ -104,18 +104,16 @@ public class LogInModel extends BaseModel{
             response.sendRedirect("/user/info");
         }
         catch(InvalidTokenException ex){
-            try{
-                response.sendRedirect("/");
-            }
-            catch(IOException ioEx){
-                _Logger.error(ioEx.getMessage(), ioEx);
-            }
+            _Logger.error(ex.getMessage(), ex);
         }
         catch(IOException | TException ex){
             _Logger.error(ex.getMessage(), ex);
         }
         catch(Exception ex){
             _Logger.error(ex.getMessage(), ex);
+        }
+        finally{
+            Profiler.closeThreadProfiler();
         }
     }
 }

@@ -4,8 +4,18 @@
  */
 package com.vng.zing.serverchain.app;
 
+import com.vng.zing.resource.thrift.Account;
+import com.vng.zing.resource.thrift.Application;
+import com.vng.zing.resource.thrift.Authenticator;
+import com.vng.zing.serverchain.handlers.TAccountHandler;
+import com.vng.zing.serverchain.handlers.TApplicationHandler;
+import com.vng.zing.serverchain.handlers.TAuthenticatorHandler;
 import com.vng.zing.serverchain.servers.HServers;
 import com.vng.zing.serverchain.servers.TServers;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import org.rythmengine.Rythm;
 
 /**
  *
@@ -21,7 +31,7 @@ public class MainApp {
 		///
 		///http servers
 		///
-                System.setProperty("name", "serverchain");
+                init();
                 
 		HServers hServers = new HServers();
 		if (!hServers.setupAndStart()) {
@@ -30,12 +40,53 @@ public class MainApp {
 		}
 
 		///
-		///thrift servers
+		///thrift servers: Authenticator
 		///
-		TServers tServers = new TServers();
-		if (!tServers.setupAndStart()) {
-			System.err.println("Could not start thrift servers! Exit now.");
+		TServers tAuthServers = new TServers(
+                        new Authenticator.Processor(new TAuthenticatorHandler()),
+                        "Authenticator");
+		if (!tAuthServers.setupAndStart()) {
+			System.err.println("Could not start thrift authenticator servers! Exit now.");
+			System.exit(1);
+		}
+                
+                ///
+		///thrift servers: Application
+		///
+		TServers tAppServers = new TServers(
+                        new Application.Processor(new TApplicationHandler()),
+                        "Application");
+		if (!tAppServers.setupAndStart()) {
+			System.err.println("Could not start thrift application servers! Exit now.");
+			System.exit(1);
+		}
+                
+                ///
+		///thrift servers: Account
+		///
+		TServers tAccServers = new TServers(
+                        new Account.Processor(new TAccountHandler()),
+                        "Account");
+		if (!tAccServers.setupAndStart()) {
+			System.err.println("Could not start thrift account servers! Exit now.");
 			System.exit(1);
 		}
 	}
+        
+        private static boolean initialized = false;
+
+        private static void init() {
+            if (initialized) {
+                return;
+            }
+            System.setProperty("project.name", "serverchain");
+            System.setProperty("project.dir", System.getProperty("user.dir"));
+            System.setProperty("project.webcontent", System.getProperty("project.dir") + "/webcontent");
+            System.setProperty("project.template", System.getProperty("project.webcontent") + "/rythm");
+            
+            Map<String, Object> conf = new HashMap<>();
+            conf.put("home.template",System.getProperty("project.template"));
+            Rythm.init(conf);
+            initialized = true;
+        }
 }

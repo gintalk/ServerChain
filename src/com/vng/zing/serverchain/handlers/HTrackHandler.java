@@ -7,7 +7,7 @@ package com.vng.zing.serverchain.handlers;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.stats.Profiler;
 import com.vng.zing.stats.ThreadProfiler;
-import com.vng.zing.serverchain.model.TrackModel;
+import com.vng.zing.serverchain.model.HTrackModel;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,9 +28,9 @@ import org.apache.log4j.Logger;
  *
  * @author namnq
  */
-public class TrackHandler extends HttpServlet {
+public class HTrackHandler extends HttpServlet {
 
-	private static final Logger _Logger = ZLogger.getLogger(TrackHandler.class);
+	private static final Logger _Logger = ZLogger.getLogger(HTrackHandler.class);
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -45,7 +45,7 @@ public class TrackHandler extends HttpServlet {
 	private void doProcess(HttpServletRequest req, HttpServletResponse resp) {
 		ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("TrackHandler", req);
 		try {
-			TrackModel.Instance.process(req, resp);
+			HTrackModel.Instance.process(req, resp);
 		} catch (Exception ex) {
 			_Logger.error(null, ex);
 		} finally {

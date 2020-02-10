@@ -5,7 +5,7 @@
 package com.vng.zing.serverchain.handlers;
 
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.App;
+import com.vng.zing.resource.thrift.Application;
 import com.vng.zing.resource.thrift.DatabaseException;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.serverchain.model.TAppModel;
@@ -18,8 +18,8 @@ import org.apache.thrift.TException;
  *
  * @author namnh16
  */
-public class TAppHandler implements App.Iface{
-    private static final Logger _Logger = ZLogger.getLogger(TAppHandler.class);
+public class TApplicationHandler implements Application.Iface{
+    private static final Logger _Logger = ZLogger.getLogger(TApplicationHandler.class);
     
     @Override
     public User upgrade(User user) throws DatabaseException, TException{

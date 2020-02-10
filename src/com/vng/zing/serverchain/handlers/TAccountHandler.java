@@ -35,7 +35,14 @@ public class TAccountHandler implements Account.Iface{
     }
     
     @Override
-    public void remove(int uid) throws InvalidTokenException, TException{
+    public void remove(int uId) throws InvalidTokenException, TException{
+        ThreadProfiler profiler = Profiler.createThreadProfiler("TAccountHandler.add", false);
         
+        try{
+            TAccountModel.INSTANCE.remove(uId);
+        }
+        finally{
+            Profiler.closeThreadProfiler();
+        }
     }
 }
