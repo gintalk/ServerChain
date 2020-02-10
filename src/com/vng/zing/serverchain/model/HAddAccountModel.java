@@ -4,47 +4,38 @@
  */
 package com.vng.zing.serverchain.model;
 
-import com.vng.zing.configer.ZConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.thrift.TException;
+
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.resource.thrift.Account;
-import com.vng.zing.resource.thrift.Authenticator;
 import com.vng.zing.resource.thrift.InvalidTokenException;
 import com.vng.zing.resource.thrift.Token;
 import com.vng.zing.resource.thrift.User;
-import com.vng.zing.stats.Profiler;
-import com.vng.zing.stats.ThreadProfiler;
 import com.vng.zing.thriftpool.TClientFactory;
-import com.vng.zing.thriftpool.TClientPoolConfig;
-import com.vng.zing.thriftserver.ThriftServers;
-import java.util.logging.Level;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
-import org.apache.thrift.TException;
 
 /**
  *
  * @author namnh16
  */
-public class HAddAccountModel extends BaseModel{
+public class HAddAccountModel extends BaseModel {
+
     private static final Logger _Logger = ZLogger.getLogger(HAddAccountModel.class);
     public static final HAddAccountModel INSTANCE = new HAddAccountModel();
-    
-    private final ThriftServers.Config _config = new ThriftServers.Config();
-    private final String _name = "Account";
-    
-    private HAddAccountModel(){
-        
+    private static final String _serviceName = "Account";
+
+    private HAddAccountModel() {
+
     }
-    
+
     @Override
-    public void process(HttpServletRequest request, HttpServletResponse response){
-        ThreadProfiler profiler = Profiler.getThreadProfiler();
+    public void process(HttpServletRequest request, HttpServletResponse response) {
+//        ThreadProfiler profiler = Profiler.getThreadProfiler();
         this.prepareHeaderHtml(response);
-        
-        _config.host = ZConfig.Instance.getString(ThriftServers.class, _name, "host", "127.0.0.1");
-        _config.port = ZConfig.Instance.getInt(ThriftServers.class, _name, "port", 8090);
-        
+
         /* Switch to this block if servers are running on top of HTTPS
         TSSLTransportFactory.TSSLTransportParameters params =
             new TSSLTransportFactory.TSSLTransportParameters();
@@ -70,40 +61,52 @@ public class HAddAccountModel extends BaseModel{
             accClient.add(token, user);
         }
         catch (InvalidTokenException ex){
+            try{
+                response.sendRedirect("/user/info");
+            }
+            catch(IOException ioEx){
+                _Logger.error(ioEx.getMessage(), ioEx);
+            }
         }
         catch (TException ex) {
-            Logger.getLogger(LogInServlet.class.getName()).log(Level.SEVERE, null, ex);
+            _Logger.error(ex.getMessage(), ex);
         }
-        */
-        
-        try{
-            Account.Client.Factory accClientFactory = new Account.Client.Factory();
-            TClientPoolConfig.ConnConfig connConfig = new TClientPoolConfig.ConnConfig(
-                _config.host, _config.port, _config.framed, false, 50000, _config.maxFrameSize, _config.encryptVersionPriority
+         */
+        try {
+            TClientFactory clientFactory = new TClientFactory(
+                    new Account.Client.Factory(),
+                    this.getConnectionConfig(_serviceName)
             );
-
-            TClientFactory clientFactory = new TClientFactory(accClientFactory, connConfig);
             Account.Client accClient = (Account.Client) clientFactory.makeObject();
 
             Token token = new Token();
-            token.setFieldValue(token.fieldForId(1), request.getParameter("username"));
-            token.setFieldValue(token.fieldForId(2), request.getParameter("password"));
+            token.setFieldValue(
+                    token.fieldForId(1),
+                    request.getParameter("username")
+            );
+            token.setFieldValue(
+                    token.fieldForId(2),
+                    request.getParameter("password")
+            );
 
             User user = new User();
-            user.setFieldValue(user.fieldForId(2), request.getParameter("name"));
+            user.setFieldValue(
+                    user.fieldForId(2),
+                    request.getParameter("name")
+            );
 
             accClient.add(token, user);
-            
+
+            clientFactory.destroyObject(accClient);
             response.sendRedirect("/");
-        }
-        catch(TException ex){
+        } catch (InvalidTokenException ex) {
+            this.outAndClose(request, response, "Something happened!");
+        } catch (TException ex) {
             _Logger.error(ex.getMessage(), ex);
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
             _Logger.error(ex.getMessage(), ex);
-        }
-        finally{
-            Profiler.closeThreadProfiler();
+        } finally {
+//            Profiler.closeThreadProfiler();
         }
     }
 }

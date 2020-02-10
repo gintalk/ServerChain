@@ -4,37 +4,34 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-import com.vng.zing.logger.ZLogger;
-import com.vng.zing.serverchain.model.HLogInModel;
-import com.vng.zing.stats.Profiler;
-import com.vng.zing.stats.ThreadProfiler;
-import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
+
+import com.vng.zing.serverchain.model.HLogInModel;
 
 /**
  *
  * @author namnh16
  */
 public class HLogInHandler extends HttpServlet{
-    private static final Logger _Logger = ZLogger.getLogger(HLogInHandler.class);
+//    private static final Logger _Logger = ZLogger.getLogger(HLogInHandler.class);
     
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException{
         this.doProcess(request, response);
     }
     
-    private void doProcess(HttpServletRequest request, HttpServletResponse response) throws IOException{
-        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("LogInHandler", request);
+    private void doProcess(HttpServletRequest request, HttpServletResponse response){
+//        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("LogInHandler", request);
         
         try{
             HLogInModel.INSTANCE.process(request, response);
         }
         finally{
-            Profiler.closeThreadProfiler();
+//            Profiler.closeThreadProfiler();
         }
     }
 }

@@ -4,32 +4,30 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-import com.vng.zing.logger.ZLogger;
-import com.vng.zing.serverchain.model.HUpgradeModel;
-import com.vng.zing.stats.Profiler;
-import com.vng.zing.stats.ThreadProfiler;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
+
+import com.vng.zing.serverchain.model.HUpgradeModel;
 
 /**
  *
  * @author namnh16
  */
 public class HUpgradeHandler extends HttpServlet{
-    private static final Logger _Logger = ZLogger.getLogger(HUpgradeHandler.class);
+//    private static final Logger _Logger = ZLogger.getLogger(HUpgradeHandler.class);
     
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException{
-        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("UpgradeHandler", request);
+//        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("UpgradeHandler", request);
         
         try{
             HUpgradeModel.INSTANCE.process(request, response);
         }
         finally{
-            Profiler.closeThreadProfiler();
+//            Profiler.closeThreadProfiler();
         }
     }
 }

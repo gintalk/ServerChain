@@ -4,22 +4,20 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-import com.vng.zing.logger.ZLogger;
-import com.vng.zing.serverchain.model.HRemoveAccountModel;
-import com.vng.zing.stats.Profiler;
-import com.vng.zing.stats.ThreadProfiler;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
+
+import com.vng.zing.serverchain.model.HRemoveAccountModel;
 
 /**
  *
  * @author namnh16
  */
 public class HRemoveAccountHandler extends HttpServlet{
-    private static final Logger _Logger = ZLogger.getLogger(HRemoveAccountHandler.class);
+//    private static final Logger _Logger = ZLogger.getLogger(HRemoveAccountHandler.class);
     
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException{
@@ -27,13 +25,13 @@ public class HRemoveAccountHandler extends HttpServlet{
     }
 
     private void doProcess(HttpServletRequest request, HttpServletResponse response) {
-        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("RemoveAccountHandler", request);
+//        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("RemoveAccountHandler", request);
         
         try{
             HRemoveAccountModel.INSTANCE.process(request, response);
         }
         finally{
-            Profiler.closeThreadProfiler();
+//            Profiler.closeThreadProfiler();
         }
     }
 }

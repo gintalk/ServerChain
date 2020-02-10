@@ -4,44 +4,41 @@
  */
 package com.vng.zing.serverchain.model;
 
-import com.vng.zing.logger.ZLogger;
-import com.vng.zing.stats.Profiler;
-import com.vng.zing.stats.ThreadProfiler;
-//import com.vng.zing.thriftserver.ThriftServers;
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
+
+import com.vng.zing.logger.ZLogger;
 
 /**
  *
  * @author namnh16
  */
-public class HLogOutModel extends BaseModel{
+public class HLogOutModel extends BaseModel {
+
     private static final Logger _Logger = ZLogger.getLogger(HLogOutModel.class);
     public static final HLogOutModel INSTANCE = new HLogOutModel();
-    
-//    private final ThriftServers.Config _config = new ThriftServers.Config();
-//    private final String _name = "Authenticator";
-    
-    private HLogOutModel(){
-        
+//    private  static final String _serviceName = "Authenticator";
+
+    private HLogOutModel() {
+
     }
-    
+
     @Override
-    public void process(HttpServletRequest request, HttpServletResponse response){
-        ThreadProfiler profiler = Profiler.getThreadProfiler();
+    public void process(HttpServletRequest request, HttpServletResponse response) {
+//        ThreadProfiler profiler = Profiler.getThreadProfiler();
         this.prepareHeaderHtml(response);
-        
-        try{
+
+        try {
             request.getSession(false).invalidate();
             response.sendRedirect("/");
-        }
-        catch(IOException ex){
+        } catch (IOException ex) {
             _Logger.error(ex.getMessage(), ex);
-        }
-        finally{
-            Profiler.closeThreadProfiler();
+        } finally {
+//            Profiler.closeThreadProfiler();
         }
     }
 }
