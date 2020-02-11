@@ -74,20 +74,21 @@ public class MainApp {
         }
     }
 
-    private static boolean initialized = false;
+    private static boolean _initialized = false;
 
     private static void init() {
-        if (initialized) {
+        if (_initialized) {
             return;
         }
         System.setProperty("project.name", "serverchain");
         System.setProperty("project.dir", System.getProperty("user.dir"));
-        System.setProperty("project.webcontent", System.getProperty("project.dir") + "/webcontent");
-        System.setProperty("project.template", System.getProperty("project.webcontent") + "/rythm");
+        System.setProperty("project.webdir", System.getProperty("project.dir") + "/webcontent");
+        System.setProperty("project.static", System.getProperty("project.webdir") + "/static");
+        System.setProperty("project.template", System.getProperty("project.webdir") + "/template/rythm/page");
 
         Map<String, Object> conf = new HashMap<>();
         conf.put("home.template", System.getProperty("project.template"));
         Rythm.init(conf);
-        initialized = true;
+        _initialized = true;
     }
 }

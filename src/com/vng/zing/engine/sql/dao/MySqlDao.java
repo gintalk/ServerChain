@@ -1,0 +1,13 @@
+/*
+ * Copyright (c) 2012-2016 by Zalo Group.
+ * All Rights Reserved.
+ */
+package com.vng.zing.engine.sql.dao;
+
+/**
+ *
+ * @author namnh16
+ */
+public class MySqlDao {
+    
+}

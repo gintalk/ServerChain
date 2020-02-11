@@ -4,7 +4,6 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,21 +15,20 @@ import com.vng.zing.serverchain.model.HLogInModel;
  *
  * @author namnh16
  */
-public class HLogInHandler extends HttpServlet{
-//    private static final Logger _Logger = ZLogger.getLogger(HLogInHandler.class);
-    
+public class HLoginHandler extends HttpServlet {
+//    private static final Logger _Logger = ZLogger.getLogger(HLoginHandler.class);
+
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException{
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         this.doProcess(request, response);
     }
-    
-    private void doProcess(HttpServletRequest request, HttpServletResponse response){
+
+    private void doProcess(HttpServletRequest request, HttpServletResponse response) {
 //        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("LogInHandler", request);
-        
-        try{
+
+        try {
             HLogInModel.INSTANCE.process(request, response);
-        }
-        finally{
+        } finally {
 //            Profiler.closeThreadProfiler();
         }
     }

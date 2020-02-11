@@ -53,7 +53,7 @@ public class HShowInfoModel extends BaseModel {
         String type = Utils.toStringFromUserType((UserType) user.getFieldValue(user.fieldForId(3)));
         String joinDate = (String) user.getFieldValue(user.fieldForId(4));
         String privilege = ("ADMIN".equals(type)) ? "Abuse your power!" : "Upgrade";
-        String privilegePath = ("ADMIN".equals(type)) ? "/html/remove.html" : "/user/upgrade";
+        String privilegePath = ("ADMIN".equals(type)) ? "/template/rythm/layout/remove.html" : "/user/upgrade";
         String profilePic
                 = ("Tom".equals(name) || "Spike".equals(name) || "Jerry".equals(name) || "Toodles".equals(name))
                 ? name + ".jpg" : "EricCartman.jpg";
