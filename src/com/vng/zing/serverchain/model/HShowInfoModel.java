@@ -24,9 +24,9 @@ import com.vng.zing.serverchain.utils.Utils;
  */
 public class HShowInfoModel extends BaseModel {
 
-    private static final Logger _Logger = ZLogger.getLogger(HShowInfoModel.class);
+    private static final Logger LOGGER = ZLogger.getLogger(HShowInfoModel.class);
     public static final HShowInfoModel INSTANCE = new HShowInfoModel();
-//    private static final String _serviceName = "Application";
+//    private static final String SERVICE_NAME = "Application";
 
     private HShowInfoModel() {
 
@@ -40,8 +40,9 @@ public class HShowInfoModel extends BaseModel {
         try {
             User user = (User) request.getSession(false).getAttribute("user");
             this.outAndClose(request, response, this.getInfoString(user));
-        } catch (IOException ex) {
-            _Logger.error(ex.getMessage(), ex);
+
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage(), ex);
         } finally {
 //            Profiler.closeThreadProfiler();
         }
@@ -50,21 +51,21 @@ public class HShowInfoModel extends BaseModel {
     private String getInfoString(User user) throws IOException {
         String id = String.valueOf(user.getFieldValue(user.fieldForId(1)));
         String name = (String) user.getFieldValue(user.fieldForId(2));
-        String type = Utils.toStringFromUserType((UserType) user.getFieldValue(user.fieldForId(3)));
+        String type = Utils.toString((UserType) user.getFieldValue(user.fieldForId(3)));
         String joinDate = (String) user.getFieldValue(user.fieldForId(4));
         String privilege = ("ADMIN".equals(type)) ? "Abuse your power!" : "Upgrade";
         String privilegePath = ("ADMIN".equals(type)) ? "/template/rythm/layout/remove.html" : "/user/upgrade";
         String profilePic
-                = ("Tom".equals(name) || "Spike".equals(name) || "Jerry".equals(name) || "Toodles".equals(name))
-                ? name + ".jpg" : "EricCartman.jpg";
+            = ("Tom".equals(name) || "Spike".equals(name) || "Jerry".equals(name) || "Toodles".equals(name))
+            ? name + ".jpg" : "EricCartman.jpg";
 
         return Rythm.render("info.rythm", NamedParams.from(
-                NamedParams.p("id", id),
-                NamedParams.p("name", name),
-                NamedParams.p("type", type),
-                NamedParams.p("joinDate", joinDate),
-                NamedParams.p("privilege", privilege),
-                NamedParams.p("privilegePath", privilegePath),
-                NamedParams.p("profilePic", profilePic)));
+            NamedParams.p("id", id),
+            NamedParams.p("name", name),
+            NamedParams.p("type", type),
+            NamedParams.p("joinDate", joinDate),
+            NamedParams.p("privilege", privilege),
+            NamedParams.p("privilegePath", privilegePath),
+            NamedParams.p("profilePic", profilePic)));
     }
 }

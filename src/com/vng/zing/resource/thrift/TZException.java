@@ -6,6 +6,7 @@
  */
 package com.vng.zing.resource.thrift;
 
+import com.vng.zing.engine.sql.exception.ZException;
 import org.apache.thrift.scheme.IScheme;
 import org.apache.thrift.scheme.SchemeFactory;
 import org.apache.thrift.scheme.StandardScheme;
@@ -34,26 +35,26 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, java.io.Serializable, Cloneable, Comparable<Token> {
-  private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("Token");
+public class TZException extends TException implements org.apache.thrift.TBase<TZException, TZException._Fields>, java.io.Serializable, Cloneable, Comparable<TZException> {
+  private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("TZException");
 
-  private static final org.apache.thrift.protocol.TField USERNAME_FIELD_DESC = new org.apache.thrift.protocol.TField("username", org.apache.thrift.protocol.TType.STRING, (short)1);
-  private static final org.apache.thrift.protocol.TField PASSWORD_FIELD_DESC = new org.apache.thrift.protocol.TField("password", org.apache.thrift.protocol.TType.STRING, (short)2);
+  private static final org.apache.thrift.protocol.TField MESSAGE_FIELD_DESC = new org.apache.thrift.protocol.TField("message", org.apache.thrift.protocol.TType.STRING, (short)1);
+  private static final org.apache.thrift.protocol.TField WEB_MESSAGE_FIELD_DESC = new org.apache.thrift.protocol.TField("webMessage", org.apache.thrift.protocol.TType.STRING, (short)2);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
-    schemes.put(StandardScheme.class, new TokenStandardSchemeFactory());
-    schemes.put(TupleScheme.class, new TokenTupleSchemeFactory());
-    schemes.put(TupleBinaryScheme.class, new TokenTupleBinarySchemeFactory());
+    schemes.put(StandardScheme.class, new TZExceptionStandardSchemeFactory());
+    schemes.put(TupleScheme.class, new TZExceptionTupleSchemeFactory());
+    schemes.put(TupleBinaryScheme.class, new TZExceptionTupleBinarySchemeFactory());
   }
 
-  public String username; // optional
-  public String password; // optional
+  public String message; // optional
+  public String webMessage; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    USERNAME((short)1, "username"),
-    PASSWORD((short)2, "password");
+    MESSAGE((short)1, "message"),
+    WEB_MESSAGE((short)2, "webMessage");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -68,10 +69,10 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // USERNAME
-          return USERNAME;
-        case 2: // PASSWORD
-          return PASSWORD;
+        case 1: // MESSAGE
+          return MESSAGE;
+        case 2: // WEB_MESSAGE
+          return WEB_MESSAGE;
         default:
           return null;
       }
@@ -112,106 +113,111 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
   }
 
   // isset id assignments
-  private _Fields optionals[] = {_Fields.USERNAME,_Fields.PASSWORD};
+  private _Fields optionals[] = {_Fields.MESSAGE,_Fields.WEB_MESSAGE};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.USERNAME, new org.apache.thrift.meta_data.FieldMetaData("username", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.MESSAGE, new org.apache.thrift.meta_data.FieldMetaData("message", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-    tmpMap.put(_Fields.PASSWORD, new org.apache.thrift.meta_data.FieldMetaData("password", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.WEB_MESSAGE, new org.apache.thrift.meta_data.FieldMetaData("webMessage", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
-    org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(Token.class, metaDataMap);
+    org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(TZException.class, metaDataMap);
   }
 
-  public Token() {
+  public TZException() {
+  }
+  
+  public TZException(ZException zex){
+      this.setMessage(zex.getMessage());
+      this.setWebMessage(zex.getWebMessage());
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public Token(Token other) {
-    if (other.isSetUsername()) {
-      this.username = other.username;
+  public TZException(TZException other) {
+    if (other.isSetMessage()) {
+      this.message = other.message;
     }
-    if (other.isSetPassword()) {
-      this.password = other.password;
+    if (other.isSetWebMessage()) {
+      this.webMessage = other.webMessage;
     }
   }
 
-  public Token deepCopy() {
-    return new Token(this);
+  public TZException deepCopy() {
+    return new TZException(this);
   }
 
   @Override
   public void clear() {
-    this.username = null;
-    this.password = null;
+    this.message = null;
+    this.webMessage = null;
   }
 
-  public String getUsername() {
-    return this.username;
+  public String getMessage() {
+    return this.message;
   }
 
-  public Token setUsername(String username) {
-    this.username = username;
+  public TZException setMessage(String message) {
+    this.message = message;
     return this;
   }
 
-  public void unsetUsername() {
-    this.username = null;
+  public void unsetMessage() {
+    this.message = null;
   }
 
-  /** Returns true if field username is set (has been assigned a value) and false otherwise */
-  public boolean isSetUsername() {
-    return this.username != null;
+  /** Returns true if field message is set (has been assigned a value) and false otherwise */
+  public boolean isSetMessage() {
+    return this.message != null;
   }
 
-  public void setUsernameIsSet(boolean value) {
+  public void setMessageIsSet(boolean value) {
     if (!value) {
-      this.username = null;
+      this.message = null;
     }
   }
 
-  public String getPassword() {
-    return this.password;
+  public String getWebMessage() {
+    return this.webMessage;
   }
 
-  public Token setPassword(String password) {
-    this.password = password;
+  public TZException setWebMessage(String webMessage) {
+    this.webMessage = webMessage;
     return this;
   }
 
-  public void unsetPassword() {
-    this.password = null;
+  public void unsetWebMessage() {
+    this.webMessage = null;
   }
 
-  /** Returns true if field password is set (has been assigned a value) and false otherwise */
-  public boolean isSetPassword() {
-    return this.password != null;
+  /** Returns true if field webMessage is set (has been assigned a value) and false otherwise */
+  public boolean isSetWebMessage() {
+    return this.webMessage != null;
   }
 
-  public void setPasswordIsSet(boolean value) {
+  public void setWebMessageIsSet(boolean value) {
     if (!value) {
-      this.password = null;
+      this.webMessage = null;
     }
   }
 
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
-    case USERNAME:
+    case MESSAGE:
       if (value == null) {
-        unsetUsername();
+        unsetMessage();
       } else {
-        setUsername((String)value);
+        setMessage((String)value);
       }
       break;
 
-    case PASSWORD:
+    case WEB_MESSAGE:
       if (value == null) {
-        unsetPassword();
+        unsetWebMessage();
       } else {
-        setPassword((String)value);
+        setWebMessage((String)value);
       }
       break;
 
@@ -220,11 +226,11 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
 
   public Object getFieldValue(_Fields field) {
     switch (field) {
-    case USERNAME:
-      return getUsername();
+    case MESSAGE:
+      return getMessage();
 
-    case PASSWORD:
-      return getPassword();
+    case WEB_MESSAGE:
+      return getWebMessage();
 
     }
     throw new IllegalStateException();
@@ -237,10 +243,10 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
     }
 
     switch (field) {
-    case USERNAME:
-      return isSetUsername();
-    case PASSWORD:
-      return isSetPassword();
+    case MESSAGE:
+      return isSetMessage();
+    case WEB_MESSAGE:
+      return isSetWebMessage();
     }
     throw new IllegalStateException();
   }
@@ -249,30 +255,30 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
   public boolean equals(Object that) {
     if (that == null)
       return false;
-    if (that instanceof Token)
-      return this.equals((Token)that);
+    if (that instanceof TZException)
+      return this.equals((TZException)that);
     return false;
   }
 
-  public boolean equals(Token that) {
+  public boolean equals(TZException that) {
     if (that == null)
       return false;
 
-    boolean this_present_username = true && this.isSetUsername();
-    boolean that_present_username = true && that.isSetUsername();
-    if (this_present_username || that_present_username) {
-      if (!(this_present_username && that_present_username))
+    boolean this_present_message = true && this.isSetMessage();
+    boolean that_present_message = true && that.isSetMessage();
+    if (this_present_message || that_present_message) {
+      if (!(this_present_message && that_present_message))
         return false;
-      if (!this.username.equals(that.username))
+      if (!this.message.equals(that.message))
         return false;
     }
 
-    boolean this_present_password = true && this.isSetPassword();
-    boolean that_present_password = true && that.isSetPassword();
-    if (this_present_password || that_present_password) {
-      if (!(this_present_password && that_present_password))
+    boolean this_present_webMessage = true && this.isSetWebMessage();
+    boolean that_present_webMessage = true && that.isSetWebMessage();
+    if (this_present_webMessage || that_present_webMessage) {
+      if (!(this_present_webMessage && that_present_webMessage))
         return false;
-      if (!this.password.equals(that.password))
+      if (!this.webMessage.equals(that.webMessage))
         return false;
     }
 
@@ -285,29 +291,29 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
   }
 
   @Override
-  public int compareTo(Token other) {
+  public int compareTo(TZException other) {
     if (!getClass().equals(other.getClass())) {
       return getClass().getName().compareTo(other.getClass().getName());
     }
 
     int lastComparison = 0;
 
-    lastComparison = Boolean.valueOf(isSetUsername()).compareTo(other.isSetUsername());
+    lastComparison = Boolean.valueOf(isSetMessage()).compareTo(other.isSetMessage());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetUsername()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.username, other.username);
+    if (isSetMessage()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.message, other.message);
       if (lastComparison != 0) {
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetPassword()).compareTo(other.isSetPassword());
+    lastComparison = Boolean.valueOf(isSetWebMessage()).compareTo(other.isSetWebMessage());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetPassword()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.password, other.password);
+    if (isSetWebMessage()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.webMessage, other.webMessage);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -329,25 +335,25 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("Token(");
+    StringBuilder sb = new StringBuilder("TZException(");
     boolean first = true;
 
-    if (isSetUsername()) {
-      sb.append("username:");
-      if (this.username == null) {
+    if (isSetMessage()) {
+      sb.append("message:");
+      if (this.message == null) {
         sb.append("null");
       } else {
-        sb.append(this.username);
+        sb.append(this.message);
       }
       first = false;
     }
-    if (isSetPassword()) {
+    if (isSetWebMessage()) {
       if (!first) sb.append(", ");
-      sb.append("password:");
-      if (this.password == null) {
+      sb.append("webMessage:");
+      if (this.webMessage == null) {
         sb.append("null");
       } else {
-        sb.append(this.password);
+        sb.append(this.webMessage);
       }
       first = false;
     }
@@ -376,15 +382,15 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
     }
   }
 
-  private static class TokenStandardSchemeFactory implements SchemeFactory {
-    public TokenStandardScheme getScheme() {
-      return new TokenStandardScheme();
+  private static class TZExceptionStandardSchemeFactory implements SchemeFactory {
+    public TZExceptionStandardScheme getScheme() {
+      return new TZExceptionStandardScheme();
     }
   }
 
-  private static class TokenStandardScheme extends StandardScheme<Token> {
+  private static class TZExceptionStandardScheme extends StandardScheme<TZException> {
 
-    public void read(org.apache.thrift.protocol.TProtocol iprot, Token struct) throws org.apache.thrift.TException {
+    public void read(org.apache.thrift.protocol.TProtocol iprot, TZException struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TField schemeField;
       iprot.readStructBegin();
       while (true)
@@ -394,18 +400,18 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
           break;
         }
         switch (schemeField.id) {
-          case 1: // USERNAME
+          case 1: // MESSAGE
             if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-              struct.username = iprot.readString();
-              struct.setUsernameIsSet(true);
+              struct.message = iprot.readString();
+              struct.setMessageIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // PASSWORD
+          case 2: // WEB_MESSAGE
             if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-              struct.password = iprot.readString();
-              struct.setPasswordIsSet(true);
+              struct.webMessage = iprot.readString();
+              struct.setWebMessageIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -421,21 +427,21 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
       struct.validate();
     }
 
-    public void write(org.apache.thrift.protocol.TProtocol oprot, Token struct) throws org.apache.thrift.TException {
+    public void write(org.apache.thrift.protocol.TProtocol oprot, TZException struct) throws org.apache.thrift.TException {
       struct.validate();
 
       oprot.writeStructBegin(STRUCT_DESC);
-      if (struct.username != null) {
-        if (struct.isSetUsername()) {
-          oprot.writeFieldBegin(USERNAME_FIELD_DESC);
-          oprot.writeString(struct.username);
+      if (struct.message != null) {
+        if (struct.isSetMessage()) {
+          oprot.writeFieldBegin(MESSAGE_FIELD_DESC);
+          oprot.writeString(struct.message);
           oprot.writeFieldEnd();
         }
       }
-      if (struct.password != null) {
-        if (struct.isSetPassword()) {
-          oprot.writeFieldBegin(PASSWORD_FIELD_DESC);
-          oprot.writeString(struct.password);
+      if (struct.webMessage != null) {
+        if (struct.isSetWebMessage()) {
+          oprot.writeFieldBegin(WEB_MESSAGE_FIELD_DESC);
+          oprot.writeString(struct.webMessage);
           oprot.writeFieldEnd();
         }
       }
@@ -445,86 +451,86 @@ public class Token implements org.apache.thrift.TBase<Token, Token._Fields>, jav
 
   }
 
-  private static class TokenTupleSchemeFactory implements SchemeFactory {
-    public TokenTupleScheme getScheme() {
-      return new TokenTupleScheme();
+  private static class TZExceptionTupleSchemeFactory implements SchemeFactory {
+    public TZExceptionTupleScheme getScheme() {
+      return new TZExceptionTupleScheme();
     }
   }
 
-  private static class TokenTupleScheme extends TupleScheme<Token> {
+  private static class TZExceptionTupleScheme extends TupleScheme<TZException> {
 
     @Override
-    public void write(org.apache.thrift.protocol.TProtocol prot, Token struct) throws org.apache.thrift.TException {
+    public void write(org.apache.thrift.protocol.TProtocol prot, TZException struct) throws org.apache.thrift.TException {
       TTupleProtocol oprot = (TTupleProtocol) prot;
       BitSet optionals = new BitSet();
-      if (struct.isSetUsername()) {
+      if (struct.isSetMessage()) {
         optionals.set(0);
       }
-      if (struct.isSetPassword()) {
+      if (struct.isSetWebMessage()) {
         optionals.set(1);
       }
       oprot.writeBitSet(optionals, 2);
-      if (struct.isSetUsername()) {
-        oprot.writeString(struct.username);
+      if (struct.isSetMessage()) {
+        oprot.writeString(struct.message);
       }
-      if (struct.isSetPassword()) {
-        oprot.writeString(struct.password);
+      if (struct.isSetWebMessage()) {
+        oprot.writeString(struct.webMessage);
       }
     }
 
     @Override
-    public void read(org.apache.thrift.protocol.TProtocol prot, Token struct) throws org.apache.thrift.TException {
+    public void read(org.apache.thrift.protocol.TProtocol prot, TZException struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
       BitSet incoming = iprot.readBitSet(2);
       if (incoming.get(0)) {
-        struct.username = iprot.readString();
-        struct.setUsernameIsSet(true);
+        struct.message = iprot.readString();
+        struct.setMessageIsSet(true);
       }
       if (incoming.get(1)) {
-        struct.password = iprot.readString();
-        struct.setPasswordIsSet(true);
+        struct.webMessage = iprot.readString();
+        struct.setWebMessageIsSet(true);
       }
     }
   }
 
-  private static class TokenTupleBinarySchemeFactory implements SchemeFactory {
-    public TokenTupleBinaryScheme getScheme() {
-      return new TokenTupleBinaryScheme();
+  private static class TZExceptionTupleBinarySchemeFactory implements SchemeFactory {
+    public TZExceptionTupleBinaryScheme getScheme() {
+      return new TZExceptionTupleBinaryScheme();
     }
   }
 
-  private static class TokenTupleBinaryScheme extends TupleBinaryScheme<Token> {
+  private static class TZExceptionTupleBinaryScheme extends TupleBinaryScheme<TZException> {
 
     @Override
-    public void write(org.apache.thrift.protocol.TProtocol prot, Token struct) throws org.apache.thrift.TException {
+    public void write(org.apache.thrift.protocol.TProtocol prot, TZException struct) throws org.apache.thrift.TException {
       TTupleBinaryProtocol oprot = (TTupleBinaryProtocol) prot;
       BitSet optionals = new BitSet();
-      if (struct.isSetUsername()) {
+      if (struct.isSetMessage()) {
         optionals.set(0);
       }
-      if (struct.isSetPassword()) {
+      if (struct.isSetWebMessage()) {
         optionals.set(1);
       }
       oprot.writeBitSet(optionals, 2);
-      if (struct.isSetUsername()) {
-        oprot.writeString(struct.username);
+      if (struct.isSetMessage()) {
+        oprot.writeString(struct.message);
       }
-      if (struct.isSetPassword()) {
-        oprot.writeString(struct.password);
+      if (struct.isSetWebMessage()) {
+        oprot.writeString(struct.webMessage);
       }
     }
 
     @Override
-    public void read(org.apache.thrift.protocol.TProtocol prot, Token struct) throws org.apache.thrift.TException {
+    public void read(org.apache.thrift.protocol.TProtocol prot, TZException struct) throws org.apache.thrift.TException {
       TTupleBinaryProtocol iprot = (TTupleBinaryProtocol) prot;
       BitSet incoming = iprot.readBitSet(2);
       if (incoming.get(0)) {
-        struct.username = iprot.readString();
-        struct.setUsernameIsSet(true);
+        struct.message = iprot.readString();
+        struct.setMessageIsSet(true);
       }
       if (incoming.get(1)) {
-        struct.password = iprot.readString();
-        struct.setPasswordIsSet(true);
+        struct.webMessage = iprot.readString();
+        struct.setWebMessageIsSet(true);
       }
     }
   }

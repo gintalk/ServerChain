@@ -35,8 +35,8 @@ public abstract class BaseModel {
         config.port = ZConfig.Instance.getInt(ThriftServers.class, serviceName, "port", 8090);
 
         return new TClientPoolConfig.ConnConfig(
-                config.host, config.port, config.framed, false, 50000,
-                config.maxFrameSize, config.encryptVersionPriority
+            config.host, config.port, config.framed, false, 50000,
+            config.maxFrameSize, config.encryptVersionPriority
         );
     }
 

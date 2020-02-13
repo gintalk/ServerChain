@@ -4,17 +4,14 @@
  */
 package com.vng.zing.serverchain.model;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.apache.thrift.TException;
 
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.resource.thrift.Application;
-import com.vng.zing.resource.thrift.InvalidTokenException;
+import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.thriftpool.TClientFactory;
 
@@ -24,9 +21,9 @@ import com.vng.zing.thriftpool.TClientFactory;
  */
 public class HUpgradeModel extends BaseModel {
 
-    private static final Logger _Logger = ZLogger.getLogger(HUpgradeModel.class);
+    private static final Logger LOGGER = ZLogger.getLogger(HUpgradeModel.class);
     public static final HUpgradeModel INSTANCE = new HUpgradeModel();
-    private static final String _serviceName = "Application";
+    private static final String SERVICE_NAME = "Application";
 
     private HUpgradeModel() {
 
@@ -39,7 +36,7 @@ public class HUpgradeModel extends BaseModel {
 
         User user = (User) request.getSession(false).getAttribute("user");
         if (user == null) {
-//            out.println("Must log in first");
+            this.outAndClose(request, response, "Must log in first");
         } /* Switch to this block if servers are running on top of HTTPS
         else{
             TSSLTransportFactory.TSSLTransportParameters params =
@@ -67,8 +64,8 @@ public class HUpgradeModel extends BaseModel {
         }*/ else {
             try {
                 TClientFactory clientFactory = new TClientFactory(
-                        new Application.Client.Factory(),
-                        this.getConnectionConfig(_serviceName)
+                    new Application.Client.Factory(),
+                    this.getConnectionConfig(SERVICE_NAME)
                 );
                 Application.Client appClient = (Application.Client) clientFactory.makeObject();
 
@@ -76,16 +73,11 @@ public class HUpgradeModel extends BaseModel {
 
                 clientFactory.destroyObject(appClient);
                 response.sendRedirect("/user/info");
-            } catch (InvalidTokenException ex) {
-                try {
-                    response.sendRedirect("/user/info");
-                } catch (IOException ioEx) {
-                    _Logger.error(ioEx.getMessage(), ioEx);
-                }
-            } catch (TException ex) {
-                _Logger.error(ex.getMessage(), ex);
+
+            } catch (TZException ex) {
+                this.outAndClose(request, response, ex.getWebMessage());
             } catch (Exception ex) {
-                _Logger.error(ex.getMessage(), ex);
+                LOGGER.error(ex.getMessage(), ex);
             } finally {
 //                Profiler.closeThreadProfiler();
             }

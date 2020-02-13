@@ -4,17 +4,15 @@
  */
 package com.vng.zing.serverchain.model;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.apache.thrift.TException;
 
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.media.common.utils.ServletUtils;
 import com.vng.zing.resource.thrift.Authenticator;
-import com.vng.zing.resource.thrift.InvalidTokenException;
+import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.thriftpool.TClientFactory;
 
@@ -22,13 +20,13 @@ import com.vng.zing.thriftpool.TClientFactory;
  *
  * @author namnh16
  */
-public class HLogInModel extends BaseModel {
+public class HLoginModel extends BaseModel {
 
-    private static final Logger _Logger = ZLogger.getLogger(HLogInModel.class);
-    public static final HLogInModel INSTANCE = new HLogInModel();
-    private static final String _serviceName = "Authenticator";
+    private static final Logger LOGGER = ZLogger.getLogger(HLoginModel.class);
+    public static final HLoginModel INSTANCE = new HLoginModel();
+    private static final String SERVICE_NAME = "Authenticator";
 
-    private HLogInModel() {
+    private HLoginModel() {
 
     }
 
@@ -74,32 +72,25 @@ public class HLogInModel extends BaseModel {
         }
          */
         try {
-//            TBinaryProtocol.Factory binProtFactory = new TBinaryProtocol.Factory();
             TClientFactory clientFactory = new TClientFactory(
-                    new Authenticator.Client.Factory(),
-                    this.getConnectionConfig(_serviceName)
+                new Authenticator.Client.Factory(),
+                this.getConnectionConfig(SERVICE_NAME)
             );
             Authenticator.Client authClient = (Authenticator.Client) clientFactory.makeObject();
 
             User user = authClient.authenticate(
-                    request.getParameter("username"),
-                    request.getParameter("password")
+                ServletUtils.getString(request, "username", ""),
+                ServletUtils.getString(request, "password", "")
             );
-
             request.getSession(true).setAttribute("user", user);
 
             clientFactory.destroyObject(authClient);
             response.sendRedirect("/user/info");
-        } catch (InvalidTokenException ex) {
-            try {
-                response.sendRedirect("/");
-            } catch (IOException ioEx) {
-                _Logger.error(ioEx.getMessage(), ioEx);
-            }
-        } catch (TException ex) {
-            _Logger.error(ex.getMessage(), ex);
+
+        } catch (TZException ex) {
+            this.outAndClose(request, response, ex.getWebMessage());
         } catch (Exception ex) {
-            _Logger.error(ex.getMessage(), ex);
+            LOGGER.error(ex.getMessage(), ex);
         } finally {
 //            Profiler.closeThreadProfiler();
         }

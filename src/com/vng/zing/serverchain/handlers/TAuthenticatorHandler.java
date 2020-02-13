@@ -4,30 +4,28 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-
-import org.apache.thrift.TException;
-
+import com.vng.zing.engine.sql.exception.ZException;
 import com.vng.zing.resource.thrift.Authenticator;
-import com.vng.zing.resource.thrift.DatabaseException;
-import com.vng.zing.resource.thrift.InvalidTokenException;
+import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.serverchain.model.TAuthenticatorModel;
+
 /**
  *
  * @author namnh16
  */
-public class TAuthenticatorHandler implements Authenticator.Iface{
+public class TAuthenticatorHandler implements Authenticator.Iface {
 //    private static final Logger _Logger = ZLogger.getLogger(TAuthenticatorHandler.class);
-    
+
     @Override
-    public User authenticate(String username, String password)
-            throws InvalidTokenException, DatabaseException, TException{
+    public User authenticate(String username, String password) throws TZException {
 //        ThreadProfiler profiler = Profiler.createThreadProfiler("TAuthenticatorHandler.authenticate", false);
-        
-        try{
+
+        try {
             return TAuthenticatorModel.INSTANCE.authenticate(username, password);
-        }
-        finally{
+        } catch (ZException ex) {
+            throw new TZException(ex);
+        } finally {
 //            Profiler.closeThreadProfiler();
         }
     }

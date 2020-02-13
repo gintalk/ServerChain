@@ -44,8 +44,8 @@ public class MainApp {
         ///thrift servers: Authenticator
         ///
         TServers tAuthServers = new TServers(
-                new Authenticator.Processor(new TAuthenticatorHandler()),
-                "Authenticator");
+            new Authenticator.Processor(new TAuthenticatorHandler()),
+            "Authenticator");
         if (!tAuthServers.setupAndStart()) {
             System.err.println("Could not start thrift authenticator servers! Exit now.");
             System.exit(1);
@@ -55,8 +55,8 @@ public class MainApp {
         ///thrift servers: Application
         ///
         TServers tAppServers = new TServers(
-                new Application.Processor(new TApplicationHandler()),
-                "Application");
+            new Application.Processor(new TApplicationHandler()),
+            "Application");
         if (!tAppServers.setupAndStart()) {
             System.err.println("Could not start thrift application servers! Exit now.");
             System.exit(1);
@@ -66,8 +66,8 @@ public class MainApp {
         ///thrift servers: Account
         ///
         TServers tAccServers = new TServers(
-                new Account.Processor(new TAccountHandler()),
-                "Account");
+            new Account.Processor(new TAccountHandler()),
+            "Account");
         if (!tAccServers.setupAndStart()) {
             System.err.println("Could not start thrift account servers! Exit now.");
             System.exit(1);

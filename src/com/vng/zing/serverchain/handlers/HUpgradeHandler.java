@@ -4,7 +4,6 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,17 +15,16 @@ import com.vng.zing.serverchain.model.HUpgradeModel;
  *
  * @author namnh16
  */
-public class HUpgradeHandler extends HttpServlet{
+public class HUpgradeHandler extends HttpServlet {
 //    private static final Logger _Logger = ZLogger.getLogger(HUpgradeHandler.class);
-    
+
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException{
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 //        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("UpgradeHandler", request);
-        
-        try{
+
+        try {
             HUpgradeModel.INSTANCE.process(request, response);
-        }
-        finally{
+        } finally {
 //            Profiler.closeThreadProfiler();
         }
     }

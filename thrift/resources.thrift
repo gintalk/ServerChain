@@ -24,24 +24,20 @@ struct User{
     4: optional string joinDate;
 }
 
-exception InvalidTokenException{
-    1: string message;
-}
-
-exception DatabaseException{
-    1: string message;
+exception TZException{
+    1: optional string message;
+    2: optional string webMessage;
 }
 
 service Application{
-    User upgrade(1: User user) throws(1: DatabaseException dbe);
-    string showInfo(1: User user) throws(1: DatabaseException dbe);
+    User upgrade(1: User user) throws(1: TZException ex);
 }
 
 service Account{
-    void add(1: Token token, 2: User user) throws(1: InvalidTokenException invalid);
-    void remove(1: i32 uId) throws(1: InvalidTokenException invalid);
+    void add(1: Token token, 2: User user) throws(1: TZException ex);
+    void remove(1: i32 uId) throws(1: TZException ex);
 }
 
 service Authenticator{
-    User authenticate(1: string username, 2: string password) throws(1: InvalidTokenException invalid, 2: DatabaseException dbe);
+    User authenticate(1: string username, 2: string password) throws(1: TZException ex);
 }

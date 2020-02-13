@@ -4,7 +4,6 @@
  */
 package com.vng.zing.serverchain.servers;
 
-
 import org.apache.thrift.TProcessor;
 
 import com.vng.zing.thriftserver.ThriftServers;
@@ -15,8 +14,8 @@ import com.vng.zing.thriftserver.ThriftServers;
  */
 public class TServers {
 
-    private TProcessor _processor;
-    private String _serviceName;
+    private final TProcessor _processor;
+    private final String _serviceName;
 
     public TServers(TProcessor processor, String serviceName) {
         this._processor = processor;

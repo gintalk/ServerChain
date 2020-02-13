@@ -4,7 +4,6 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,20 +15,19 @@ import com.vng.zing.serverchain.model.HShowInfoModel;
  *
  * @author namnh16
  */
-public class HShowInfoHandler extends HttpServlet{
+public class HShowInfoHandler extends HttpServlet {
 //    private static final Logger _Logger = ZLogger.getLogger(HShowInfoHandler.class);
-    
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException{
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         this.doProcess(request, response);
     }
-    
-    private void doProcess(HttpServletRequest request, HttpServletResponse response){
+
+    private void doProcess(HttpServletRequest request, HttpServletResponse response) {
 //        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("ShowInfoHandler", request);
-        
-        try{
+
+        try {
             HShowInfoModel.INSTANCE.process(request, response);
-        }
-        finally{
+        } finally {
 //            Profiler.closeThreadProfiler();
         }
     }

@@ -4,18 +4,14 @@
  */
 package com.vng.zing.serverchain.model;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Date;
 
 import org.apache.log4j.Logger;
-import org.apache.thrift.TException;
 
+import com.vng.zing.engine.dal.UserDal;
+import com.vng.zing.engine.dal.UserTokenDal;
+import com.vng.zing.engine.sql.exception.ZException;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.InvalidTokenException;
 import com.vng.zing.resource.thrift.Token;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.resource.thrift.UserType;
@@ -27,70 +23,44 @@ import com.vng.zing.serverchain.utils.Utils;
  */
 public class TAccountModel {
 
-    private static final Logger _Logger = ZLogger.getLogger(TAccountModel.class);
+    private static final Logger LOGGER = ZLogger.getLogger(TAccountModel.class);
     public static final TAccountModel INSTANCE = new TAccountModel();
 
     private TAccountModel() {
 
     }
 
-    public void add(Token token, User user) throws InvalidTokenException, TException {
-        int curAI = -1;
-
-        try (
-                Connection authCon = Utils.getAuthDBConnection();
-                PreparedStatement authStm = authCon.prepareStatement("INSERT INTO "
-                        + "UserToken VALUES(?, ?, ?)");
-                PreparedStatement curStm = authCon.prepareStatement("SELECT "
-                        + "AUTO_INCREMENT FROM information_schema.TABLES WHERE "
-                        + "table_name='UserToken' AND table_schema=database()");
-                ResultSet resultSet = curStm.executeQuery();) {
-            resultSet.next();
-            curAI = resultSet.getInt("AUTO_INCREMENT");
-
-            authStm.setInt(1, curAI);
-            authStm.setString(2, (String) token.getFieldValue(token.fieldForId(1)));                    // 1: username
-            authStm.setString(3, Utils.md5((String) token.getFieldValue(token.fieldForId(2))));         // 2: password
-
-            authStm.executeUpdate();
-        } catch (SQLException sqle) {
-            if (sqle.getErrorCode() == 1062) {
-                throw new InvalidTokenException("User "
-                        + (String) token.getFieldValue(token.fieldForId(1)) + " already exists");
-            } else {
-                _Logger.error(sqle);
-            }
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
-            _Logger.error(ex);
+    public void add(Token token, User user) throws ZException {
+        if (token == null || user == null) {
+            return;
         }
 
-        try (
-                Connection appCon = Utils.getAppDBConnection();
-                PreparedStatement appStm = appCon.prepareStatement("INSERT INTO "
-                        + "User VALUES(?, ?, ?, ?)");) {
-            appStm.setInt(1, curAI);                                                                            // 1: id
-            appStm.setString(2, (String) user.getFieldValue(user.fieldForId(2)));                               // 2: name
-            appStm.setString(3, Utils.toStringFromUserType(UserType.REGULAR));                                  // 3: type
-            appStm.setDate(4, Utils.getCurrentSQLDate());                                                       // 4: joinDate
+        String username = (String) token.getFieldValue(token.fieldForId(1));
+        String password = Utils.md5((String) token.getFieldValue(token.fieldForId(2)));
 
-            appStm.executeUpdate();
-        } catch (SQLException sqle) {
-            _Logger.error(sqle);
+        int tokenAutoKey = UserTokenDal.INSTANCE.addItemAutoKey(username, password);
+        if (tokenAutoKey > 0) {
+            String name = (String) user.getFieldValue(user.fieldForId(2));
+            String type = Utils.toString(UserType.REGULAR);
+            Date joinDate = Utils.getCurrentSQLDate();
+
+            if (!UserDal.INSTANCE.addItem(tokenAutoKey, name, type, joinDate)) {
+                UserTokenDal.INSTANCE.removeItem(tokenAutoKey);
+                throw new ZException("Add user failed", ZException.State.ADD_USER_FAILED);
+            }
+        } else {
+            throw new ZException("Add token failed", ZException.State.ADD_TOKEN_FAILED);
         }
     }
 
-    public void remove(int uId) throws InvalidTokenException, TException {
-        try (
-                Connection authCon = Utils.getAuthDBConnection();
-                PreparedStatement authStm = authCon.prepareStatement("DELETE FROM "
-                        + "UserToken WHERE id=?");) {
-            authStm.setInt(1, uId);
+    public void remove(int id) throws ZException {
+        if (id < 1) {
+            return;
+        }
 
-            if (authStm.executeUpdate() == 0) {
-                throw new InvalidTokenException("User number " + uId + " does not exist");
-            }
-        } catch (SQLException sqle) {
-            _Logger.error(sqle);
+        if (!UserTokenDal.INSTANCE.removeItem(id)) {
+            throw new ZException("Remove token failed", ZException.State.REMOVE_TOKEN_FAILED);
         }
     }
+
 }

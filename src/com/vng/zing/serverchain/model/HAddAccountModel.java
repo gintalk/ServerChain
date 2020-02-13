@@ -8,11 +8,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.apache.thrift.TException;
 
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.media.common.utils.ServletUtils;
 import com.vng.zing.resource.thrift.Account;
-import com.vng.zing.resource.thrift.InvalidTokenException;
+import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.Token;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.thriftpool.TClientFactory;
@@ -23,9 +23,9 @@ import com.vng.zing.thriftpool.TClientFactory;
  */
 public class HAddAccountModel extends BaseModel {
 
-    private static final Logger _Logger = ZLogger.getLogger(HAddAccountModel.class);
+    private static final Logger LOGGER = ZLogger.getLogger(HAddAccountModel.class);
     public static final HAddAccountModel INSTANCE = new HAddAccountModel();
-    private static final String _serviceName = "Account";
+    private static final String SERVICE_NAME = "Account";
 
     private HAddAccountModel() {
 
@@ -65,46 +65,44 @@ public class HAddAccountModel extends BaseModel {
                 response.sendRedirect("/user/info");
             }
             catch(IOException ioEx){
-                _Logger.error(ioEx.getMessage(), ioEx);
+                LOGGER.error(ioEx.getMessage(), ioEx);
             }
         }
         catch (TException ex) {
-            _Logger.error(ex.getMessage(), ex);
+            LOGGER.error(ex.getMessage(), ex);
         }
          */
         try {
             TClientFactory clientFactory = new TClientFactory(
-                    new Account.Client.Factory(),
-                    this.getConnectionConfig(_serviceName)
+                new Account.Client.Factory(),
+                this.getConnectionConfig(SERVICE_NAME)
             );
             Account.Client accClient = (Account.Client) clientFactory.makeObject();
 
             Token token = new Token();
             token.setFieldValue(
-                    token.fieldForId(1),
-                    request.getParameter("username")
+                token.fieldForId(1),
+                ServletUtils.getString(request, "username", "")
             );
             token.setFieldValue(
-                    token.fieldForId(2),
-                    request.getParameter("password")
+                token.fieldForId(2),
+                ServletUtils.getString(request, "password", "")
             );
 
             User user = new User();
             user.setFieldValue(
-                    user.fieldForId(2),
-                    request.getParameter("name")
+                user.fieldForId(2),
+                ServletUtils.getString(request, "name", "")
             );
-
             accClient.add(token, user);
 
             clientFactory.destroyObject(accClient);
             response.sendRedirect("/");
-        } catch (InvalidTokenException ex) {
-            this.outAndClose(request, response, "Something happened!");
-        } catch (TException ex) {
-            _Logger.error(ex.getMessage(), ex);
+
+        } catch (TZException ex) {
+            this.outAndClose(request, response, ex.getWebMessage());
         } catch (Exception ex) {
-            _Logger.error(ex.getMessage(), ex);
+            LOGGER.error(ex.getMessage(), ex);
         } finally {
 //            Profiler.closeThreadProfiler();
         }

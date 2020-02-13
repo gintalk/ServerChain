@@ -4,17 +4,15 @@
  */
 package com.vng.zing.serverchain.model;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.apache.thrift.TException;
 
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.media.common.utils.ServletUtils;
 import com.vng.zing.resource.thrift.Account;
-import com.vng.zing.resource.thrift.InvalidTokenException;
+import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.resource.thrift.UserType;
 import com.vng.zing.thriftpool.TClientFactory;
@@ -25,9 +23,9 @@ import com.vng.zing.thriftpool.TClientFactory;
  */
 public class HRemoveAccountModel extends BaseModel {
 
-    private static final Logger _Logger = ZLogger.getLogger(HRemoveAccountModel.class);
+    private static final Logger LOGGER = ZLogger.getLogger(HRemoveAccountModel.class);
     public static final HRemoveAccountModel INSTANCE = new HRemoveAccountModel();
-    private static final String _serviceName = "Account";
+    private static final String SERVICE_NAME = "Account";
 
     private HRemoveAccountModel() {
 
@@ -40,9 +38,9 @@ public class HRemoveAccountModel extends BaseModel {
 
         User user = (User) request.getSession(false).getAttribute("user");
         if (user == null) {
-//            out.println("Must log in first");
+            this.outAndClose(request, response, "Must log in first");
         } else if (user.getType() != UserType.ADMIN) {
-//            out.println("Reserved for ADMIN");
+            this.outAndClose(request, response, "Reserved for ADMIN");
         } /* Switch to this block if servers are running on top of HTTPS
         else{
             TSSLTransportFactory.TSSLTransportParameters params =
@@ -80,26 +78,21 @@ public class HRemoveAccountModel extends BaseModel {
          */ else {
             try {
                 TClientFactory clientFactory = new TClientFactory(
-                        new Account.Client.Factory(),
-                        this.getConnectionConfig(_serviceName)
+                    new Account.Client.Factory(),
+                    this.getConnectionConfig(SERVICE_NAME)
                 );
                 Account.Client accClient = (Account.Client) clientFactory.makeObject();
 
                 if (!"".equals(request.getParameter("id"))) {
-                    accClient.remove(Integer.parseInt(request.getParameter("id")));
+                    accClient.remove(Integer.parseInt(
+                        ServletUtils.getString(request, "id", "")));
                 }
-
                 response.sendRedirect("/user/info");
-            } catch (InvalidTokenException ex) {
-                try {
-                    response.sendRedirect("/user/info");
-                } catch (IOException ioEx) {
-                    _Logger.error(ioEx.getMessage(), ioEx);
-                }
-            } catch (TException ex) {
-                _Logger.error(ex.getMessage(), ex);
+
+            } catch (TZException ex) {
+                this.outAndClose(request, response, ex.getWebMessage());
             } catch (Exception ex) {
-                _Logger.error(ex.getMessage(), ex);
+                LOGGER.error(ex.getMessage(), ex);
             }
         }
     }

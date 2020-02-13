@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.vng.zing.serverchain.model.HLogOutModel;
+import com.vng.zing.serverchain.model.HLogoutModel;
 
 /**
  *
@@ -27,7 +27,7 @@ public class HLogoutHandler extends HttpServlet {
 //        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("LogOutHandler", request);
 
         try {
-            HLogOutModel.INSTANCE.process(request, response);
+            HLogoutModel.INSTANCE.process(request, response);
         } finally {
 //            Profiler.closeThreadProfiler();
         }

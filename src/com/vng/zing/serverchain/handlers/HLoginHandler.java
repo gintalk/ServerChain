@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.vng.zing.serverchain.model.HLogInModel;
+import com.vng.zing.serverchain.model.HLoginModel;
 
 /**
  *
@@ -27,7 +27,7 @@ public class HLoginHandler extends HttpServlet {
 //        ThreadProfiler profiler = Profiler.createThreadProfilerInHttpProc("LogInHandler", request);
 
         try {
-            HLogInModel.INSTANCE.process(request, response);
+            HLoginModel.INSTANCE.process(request, response);
         } finally {
 //            Profiler.closeThreadProfiler();
         }

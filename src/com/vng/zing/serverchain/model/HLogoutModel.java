@@ -17,13 +17,13 @@ import com.vng.zing.logger.ZLogger;
  *
  * @author namnh16
  */
-public class HLogOutModel extends BaseModel {
+public class HLogoutModel extends BaseModel {
 
-    private static final Logger _Logger = ZLogger.getLogger(HLogOutModel.class);
-    public static final HLogOutModel INSTANCE = new HLogOutModel();
-//    private  static final String _serviceName = "Authenticator";
+    private static final Logger LOGGER = ZLogger.getLogger(HLogoutModel.class);
+    public static final HLogoutModel INSTANCE = new HLogoutModel();
+//    private  static final String SERVICE_NAME = "Authenticator";
 
-    private HLogOutModel() {
+    private HLogoutModel() {
 
     }
 
@@ -35,8 +35,9 @@ public class HLogOutModel extends BaseModel {
         try {
             request.getSession(false).invalidate();
             response.sendRedirect("/");
+
         } catch (IOException ex) {
-            _Logger.error(ex.getMessage(), ex);
+            LOGGER.error(ex.getMessage(), ex);
         } finally {
 //            Profiler.closeThreadProfiler();
         }
