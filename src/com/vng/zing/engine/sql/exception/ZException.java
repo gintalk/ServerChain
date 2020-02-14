@@ -62,12 +62,12 @@ public class ZException extends Exception {
 
     public String getWebMessage() {
         switch (_state) {
+            case SQL:
+                LOGGER.error("SQL error code:" + String.valueOf(_sqlErrorCode));
             case GENERAL:
             case MISSING_USER:
             case ADD_USER_FAILED:
                 LOGGER.error(_message);
-            case SQL:
-                LOGGER.error(_sqlErrorCode);
                 return "Internal error, please report";
             case REMOVE_TOKEN_FAILED:
                 return "Token does not exist";
@@ -78,7 +78,7 @@ public class ZException extends Exception {
             case MAXIMUM_PRIVILEGE:
                 return "Unable to upgrade further";
             default:
-                return "Server-side error, please report";
+                return "Undocumented error, please report";
         }
     }
 }

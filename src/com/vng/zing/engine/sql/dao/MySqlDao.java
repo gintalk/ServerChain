@@ -4,6 +4,7 @@
  */
 package com.vng.zing.engine.sql.dao;
 
+import com.vng.zing.common.ZErrorDef;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,6 +21,7 @@ import org.apache.log4j.Logger;
 import com.vng.zing.configer.ZConfig;
 import com.vng.zing.engine.sql.exception.ZException;
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.media.common.thrift.TI32Result;
 import com.vng.zing.media.common.utils.CommonUtils;
 
 /**
@@ -70,38 +72,8 @@ public abstract class MySqlDao<T> {
         }
     }
 
-//    private void closeConnection(Connection connection) throws ZException {
-//        try{
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
-//        catch(SQLException ex){
-//            throw new ZException(ex);
-//        }
-//    }
-//
-//    private void closeConnection(ResultSet resultSet) throws ZException {
-//        try{
-//            if (resultSet != null && resultSet.getStatement() != null && resultSet.getStatement().getConnection() != null) {
-//                resultSet.getStatement().getConnection().close();
-//            }
-//        }
-//        catch(SQLException ex){
-//            throw new ZException(ex);
-//        }
-//    }
-//
-//    private PreparedStatement getPreparedStatement(String sql) throws ZException {
-//        try{
-//            return getConnection().prepareStatement(sql);
-//        }
-//        catch(SQLException ex){
-//            throw new ZException(ex);
-//        }
-//    }
-    public int insert(String sql, boolean returnAutoKey, Object... params) throws ZException {
-        int result = 0;
+    public TI32Result insert(String sql, boolean returnAutoKey, Object... params) throws ZException {
+        TI32Result result = new TI32Result(ZErrorDef.FAIL);
         try (
             Connection connection = getConnection();
             PreparedStatement ps = (returnAutoKey)
@@ -118,12 +90,19 @@ public abstract class MySqlDao<T> {
                 if (returnAutoKey) {
                     try (ResultSet rs = ps.getGeneratedKeys()) {
                         if (rs.next()) {
-                            result = rs.getInt(1);
+                            result.setFieldValue(result.fieldForId(2), rs.getInt(1));
+                        }
+                        else{
+                            result.setFieldValue(result.fieldForId(3), "ResultSet empty: auto-generated key expected");
                         }
                     }
                 } else {
-                    result = nRows;
+                    result.setFieldValue(result.fieldForId(1), ZErrorDef.SUCCESS);
+                    result.setFieldValue(result.fieldForId(2), nRows);
                 }
+            }
+            else{
+                result.setFieldValue(result.fieldForId(3), "Insert failed: 0 rows effected");
             }
         } catch (SQLException ex) {
             throw new ZException(ex);
@@ -132,8 +111,8 @@ public abstract class MySqlDao<T> {
         return result;
     }
 
-    public boolean update(String sql, Object... params) throws ZException {
-        boolean result = false;
+    public TI32Result update(String sql, Object... params) throws ZException {
+        TI32Result result = new TI32Result(ZErrorDef.FAIL);
         try (
             Connection connection = getConnection();
             PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -144,7 +123,13 @@ public abstract class MySqlDao<T> {
             }
 
             int nRows = ps.executeUpdate();
-            result = nRows > 0;
+            if(nRows > 0){
+                result.setFieldValue(result.fieldForId(1), ZErrorDef.SUCCESS);
+                result.setFieldValue(result.fieldForId(2), nRows);
+            }
+            else{
+                result.setFieldValue(result.fieldForId(3) , "Update failed: 0 rows affected");
+            }
         } catch (SQLException ex) {
             throw new ZException(ex);
         }

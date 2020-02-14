@@ -4,12 +4,14 @@
  */
 package com.vng.zing.engine.dal;
 
+import com.vng.zing.common.ZErrorDef;
 import java.util.HashMap;
 import java.util.List;
 
 import com.vng.zing.engine.sql.dao.UserDao;
 import com.vng.zing.engine.sql.exception.ZException;
 import com.vng.zing.engine.type.Pair;
+import com.vng.zing.media.common.thrift.TI32Result;
 
 /**
  *
@@ -43,7 +45,7 @@ public class UserDal implements BaseDal {
 
     @Override
     public HashMap<String, Object> getItemAsMap(String name) throws ZException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -52,11 +54,19 @@ public class UserDal implements BaseDal {
             return 0;
         }
 
-        return _userDao.insert(
+        TI32Result result = _userDao.insert(
             "INSERT INTO User VALUES(?,?,?,?)",
             true,
             params
         );
+        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
+            throw new ZException(
+                (String) result.getFieldValue(result.fieldForId(3)),
+                ZException.State.SQL
+            );
+        }
+        
+        return (int) result.getFieldValue(result.fieldForId(2));
     }
 
     @Override
@@ -65,11 +75,19 @@ public class UserDal implements BaseDal {
             return false;
         }
 
-        return _userDao.insert(
+        TI32Result result = _userDao.insert(
             "INSERT INTO User VALUES(?,?,?,?)",
             false,
             params
-        ) > 0;
+        );
+        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
+            throw new ZException(
+                (String) result.getFieldValue(result.fieldForId(3)),
+                ZException.State.SQL
+            );
+        }
+        
+        return (int) result.getFieldValue(result.fieldForId(2)) > 0;
     }
 
     @Override
@@ -97,6 +115,9 @@ public class UserDal implements BaseDal {
         sb.append("WHERE id=?");
         objects[pairs.length] = id;
 
-        return _userDao.update(sb.toString(), objects);
+        TI32Result result = _userDao.update(sb.toString(), objects);
+        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
+            
+        }
     }
 }
