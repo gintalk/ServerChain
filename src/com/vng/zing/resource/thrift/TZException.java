@@ -6,7 +6,6 @@
  */
 package com.vng.zing.resource.thrift;
 
-import com.vng.zing.engine.sql.exception.ZException;
 import org.apache.thrift.scheme.IScheme;
 import org.apache.thrift.scheme.SchemeFactory;
 import org.apache.thrift.scheme.StandardScheme;
@@ -126,11 +125,6 @@ public class TZException extends TException implements org.apache.thrift.TBase<T
   }
 
   public TZException() {
-  }
-  
-  public TZException(ZException zex){
-      this.setMessage(zex.getMessage());
-      this.setWebMessage(zex.getWebMessage());
   }
 
   /**

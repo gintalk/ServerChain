@@ -19,17 +19,17 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 
 import com.vng.zing.configer.ZConfig;
-import com.vng.zing.engine.sql.exception.ZException;
+import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.thrift.TI32Result;
 import com.vng.zing.media.common.utils.CommonUtils;
+import com.vng.zing.resource.thrift.TZException;
 
 /**
  *
  * @author namnh16
- * @param <T>
  */
-public abstract class MySqlDao<T> {
+public abstract class MySqlDao {
 
     private static final Logger LOGGER = ZLogger.getLogger(MySqlDao.class);
     private final String INSTANCE_NAME;
@@ -39,7 +39,7 @@ public abstract class MySqlDao<T> {
         INSTANCE_NAME = instanceName;
     }
 
-    private BasicDataSource getDataSource() throws ZException {
+    private BasicDataSource getDataSource() throws SQLException {
         if (DATA_SOURCES.containsKey(INSTANCE_NAME)) {
             return DATA_SOURCES.get(INSTANCE_NAME);
         }
@@ -47,7 +47,7 @@ public abstract class MySqlDao<T> {
         synchronized (DATA_SOURCES) {
             BasicDataSource dataSource = new BasicDataSource();
 
-            try {
+//            try {
                 dataSource.setDriverClassName(ZConfig.Instance.getString(MySqlDao.class, INSTANCE_NAME, "jdbc.driverClassName", ""));
                 dataSource.setUrl(ZConfig.Instance.getString(MySqlDao.class, INSTANCE_NAME, "jdbc.url", ""));
                 dataSource.setUsername(ZConfig.Instance.getString(MySqlDao.class, INSTANCE_NAME, "jdbc.username", ""));
@@ -56,23 +56,23 @@ public abstract class MySqlDao<T> {
                 dataSource.setConnectionInitSqls(Arrays.asList("set names utf8mb4"));
 
                 DATA_SOURCES.put(INSTANCE_NAME, dataSource);
-            } catch (Exception ex) {
-                throw new ZException(ex);
-            }
+//            } catch (Exception ex) {
+//                throw new ZExceptionHandler(ex);
+//            }
 
             return dataSource;
         }
     }
 
-    private Connection getConnection() throws ZException {
-        try {
+    private Connection getConnection() throws SQLException {
+//        try {
             return getDataSource().getConnection();
-        } catch (SQLException ex) {
-            throw new ZException(ex);
-        }
+//        } catch (SQLException ex) {
+//            throw new ZExceptionHandler(ex);
+//        }
     }
 
-    public TI32Result insert(String sql, boolean returnAutoKey, Object... params) throws ZException {
+    public TI32Result insert(String sql, boolean returnAutoKey, Object... params){
         TI32Result result = new TI32Result(ZErrorDef.FAIL);
         try (
             Connection connection = getConnection();
@@ -86,6 +86,7 @@ public abstract class MySqlDao<T> {
             }
 
             int nRows = ps.executeUpdate();
+            result.setFieldValue(result.fieldForId(1), ZErrorDef.SUCCESS);
             if (nRows > 0) {
                 if (returnAutoKey) {
                     try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -97,21 +98,21 @@ public abstract class MySqlDao<T> {
                         }
                     }
                 } else {
-                    result.setFieldValue(result.fieldForId(1), ZErrorDef.SUCCESS);
                     result.setFieldValue(result.fieldForId(2), nRows);
                 }
             }
             else{
-                result.setFieldValue(result.fieldForId(3), "Insert failed: 0 rows effected");
+                result.setFieldValue(result.fieldForId(3), "Insert failed: 0 row effected");
             }
         } catch (SQLException ex) {
-            throw new ZException(ex);
+            result.setFieldValue(result.fieldForId(1), ZErrorDef.FAIL);
+            result.setFieldValue(result.fieldForId(3), ex.getMessage());
         }
 
         return result;
     }
 
-    public TI32Result update(String sql, Object... params) throws ZException {
+    public TI32Result update(String sql, Object... params){
         TI32Result result = new TI32Result(ZErrorDef.FAIL);
         try (
             Connection connection = getConnection();
@@ -123,21 +124,22 @@ public abstract class MySqlDao<T> {
             }
 
             int nRows = ps.executeUpdate();
+            result.setFieldValue(result.fieldForId(1), ZErrorDef.SUCCESS);
             if(nRows > 0){
-                result.setFieldValue(result.fieldForId(1), ZErrorDef.SUCCESS);
                 result.setFieldValue(result.fieldForId(2), nRows);
             }
             else{
-                result.setFieldValue(result.fieldForId(3) , "Update failed: 0 rows affected");
+                result.setFieldValue(result.fieldForId(3) , "Update failed: 0 row affected");
             }
         } catch (SQLException ex) {
-            throw new ZException(ex);
+            result.setFieldValue(result.fieldForId(1), ZErrorDef.FAIL);
+            result.setFieldValue(result.fieldForId(3), ex.getMessage());
         }
 
         return result;
     }
 
-    public List<HashMap<String, Object>> selectAsListMap(String sql, Object... params) throws ZException {
+    public List<HashMap<String, Object>> selectAsListMap(String sql, Object... params) throws TZException {
         List<HashMap<String, Object>> result = null;
         try (
             Connection connection = getConnection();
@@ -152,23 +154,25 @@ public abstract class MySqlDao<T> {
                 result = deserializeAsListMap(rs);
             }
         } catch (SQLException ex) {
-            throw new ZException(ex);
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(tzex, ex);
+            throw tzex;
         }
 
         return result;
     }
 
-    private List<HashMap<String, Object>> deserializeAsListMap(ResultSet rs) throws ZException {
+    private List<HashMap<String, Object>> deserializeAsListMap(ResultSet rs) throws SQLException{
         List<HashMap<String, Object>> result = null;
 
-        try {
+//        try {
             if (rs != null && rs.isBeforeFirst()) {
                 ResultSetMetaData rsmd = rs.getMetaData();
                 int nCols = rsmd.getColumnCount();
 
                 List<String> cols = new ArrayList<>();
                 for (int i = 0; i < nCols; i++) {
-                    cols.add(rsmd.getColumnName(i + 1));      // column index should start from 1 and not 0
+                    cols.add(rsmd.getColumnName(i + 1));      // MySQL column index starts from 1, not 0
                 }
 
                 result = new ArrayList<>();
@@ -181,9 +185,9 @@ public abstract class MySqlDao<T> {
                     result.add(row);
                 }
             }
-        } catch (SQLException ex) {
-            throw new ZException(ex);
-        }
+//        } catch (SQLException ex) {
+//            throw new ZExceptionHandler(ex);
+//        }
 
         return result;
     }

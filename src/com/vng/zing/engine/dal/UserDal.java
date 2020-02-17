@@ -9,9 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.vng.zing.engine.sql.dao.UserDao;
-import com.vng.zing.engine.sql.exception.ZException;
+import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.engine.type.Pair;
 import com.vng.zing.media.common.thrift.TI32Result;
+import com.vng.zing.resource.thrift.TZException;
 
 /**
  *
@@ -28,12 +29,13 @@ public class UserDal implements BaseDal {
     }
 
     @Override
-    public HashMap<String, Object> getItemAsMap(int id) throws ZException {
+    public HashMap<String, Object> getItemAsMap(int id) throws TZException {
         if (id < 1) {
             return null;
         }
 
-        List<HashMap<String, Object>> rows = _userDao.selectAsListMap("SELECT id, name, type, joinDate FROM User WHERE id=?",
+        List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
+            "SELECT id, name, type, joinDate FROM User WHERE id=?",
             id
         );
         if (rows != null) {
@@ -44,12 +46,12 @@ public class UserDal implements BaseDal {
     }
 
     @Override
-    public HashMap<String, Object> getItemAsMap(String name) throws ZException {
+    public HashMap<String, Object> getItemAsMap(String name) throws TZException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public int addItemAutoKey(Object... params) throws ZException {
+    public int addItemAutoKey(Object... params) throws TZException {
         if (params == null || params.length < 4) {
             return 0;
         }
@@ -60,17 +62,20 @@ public class UserDal implements BaseDal {
             params
         );
         if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
-            throw new ZException(
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
                 (String) result.getFieldValue(result.fieldForId(3)),
-                ZException.State.SQL
+                ZExceptionHandler.State.SQL
             );
+            throw tzex;
         }
         
         return (int) result.getFieldValue(result.fieldForId(2));
     }
 
     @Override
-    public boolean addItem(Object... params) throws ZException {
+    public boolean addItem(Object... params) throws TZException {
         if (params == null || params.length < 4) {
             return false;
         }
@@ -81,22 +86,25 @@ public class UserDal implements BaseDal {
             params
         );
         if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
-            throw new ZException(
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
                 (String) result.getFieldValue(result.fieldForId(3)),
-                ZException.State.SQL
+                ZExceptionHandler.State.SQL
             );
+            throw tzex;
         }
         
         return (int) result.getFieldValue(result.fieldForId(2)) > 0;
     }
 
     @Override
-    public boolean removeItem(int i) throws ZException {
+    public boolean removeItem(int i) throws TZException {
         throw new UnsupportedOperationException("Can only cascade row removal from UserToken");
     }
 
     @Override
-    public boolean updateItem(int id, Pair... pairs) throws ZException {
+    public boolean updateItem(int id, Pair... pairs) throws TZException {
         if (id < 1 || pairs.length < 1) {
             return false;
         }
@@ -117,7 +125,15 @@ public class UserDal implements BaseDal {
 
         TI32Result result = _userDao.update(sb.toString(), objects);
         if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
-            
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                (String) result.getFieldValue(result.fieldForId(3)),
+                ZExceptionHandler.State.SQL
+            );
+            throw tzex;
         }
+        
+        return (int) result.getFieldValue(result.fieldForId(2)) > 0;
     }
 }

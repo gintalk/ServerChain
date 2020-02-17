@@ -4,12 +4,15 @@
  */
 package com.vng.zing.engine.dal;
 
+import com.vng.zing.common.ZErrorDef;
 import java.util.HashMap;
 import java.util.List;
 
 import com.vng.zing.engine.sql.dao.UserTokenDao;
-import com.vng.zing.engine.sql.exception.ZException;
+import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.engine.type.Pair;
+import com.vng.zing.media.common.thrift.TI32Result;
+import com.vng.zing.resource.thrift.TZException;
 
 /**
  *
@@ -26,7 +29,7 @@ public class UserTokenDal implements BaseDal {
     }
 
     @Override
-    public HashMap<String, Object> getItemAsMap(int id) throws ZException {
+    public HashMap<String, Object> getItemAsMap(int id) throws TZException {
         if (id < 1) {
             return null;
         }
@@ -43,7 +46,7 @@ public class UserTokenDal implements BaseDal {
     }
 
     @Override
-    public HashMap<String, Object> getItemAsMap(String username) throws ZException {
+    public HashMap<String, Object> getItemAsMap(String username) throws TZException {
         if (username == null || username.length() < 1) {
             return null;
         }
@@ -60,40 +63,78 @@ public class UserTokenDal implements BaseDal {
     }
 
     @Override
-    public int addItemAutoKey(Object... params) throws ZException {
+    public int addItemAutoKey(Object... params) throws TZException {
         if (params == null || params.length < 2) {
             return 0;
         }
 
-        return _tokenDao.insert(
+        TI32Result result = _tokenDao.insert(
             "INSERT INTO UserToken(username, password) VALUES(?,?)",
             true,
             params
         );
+        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                (String) result.getFieldValue(result.fieldForId(3)),
+                ZExceptionHandler.State.SQL
+            );
+            throw tzex;
+        }
+        
+        return (int) result.getFieldValue(result.fieldForId(2));
     }
 
     @Override
-    public boolean addItem(Object... params) throws ZException {
+    public boolean addItem(Object... params) throws TZException {
         if (params == null || params.length < 2) {
             return false;
         }
-        return _tokenDao.insert(
+        
+        TI32Result result = _tokenDao.insert(
             "INSERT INTO UserToken(username, password) VALUES(?,?)",
             false,
             params
-        ) > 0;
+        );
+        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                (String) result.getFieldValue(result.fieldForId(3)),
+                ZExceptionHandler.State.SQL
+            );
+            throw tzex;
+        }
+        
+        return (int) result.getFieldValue(result.fieldForId(2)) > 0;
     }
 
     @Override
-    public boolean removeItem(int id) throws ZException {
-        return _tokenDao.update(
+    public boolean removeItem(int id) throws TZException {
+        if(id < 1){
+            return false;
+        }
+        
+        TI32Result result = _tokenDao.update(
             "DELETE FROM UserToken WHERE id=?",
             id
         );
+        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                (String) result.getFieldValue(result.fieldForId(3)),
+                ZExceptionHandler.State.SQL
+            );
+            throw tzex;
+        }
+        
+        return (int) result.getFieldValue(result.fieldForId(2)) > 0;
     }
 
     @Override
-    public boolean updateItem(int id, Pair... pairs) throws ZException {
+    public boolean updateItem(int id, Pair... pairs) throws TZException {
         if (id < 1 || pairs.length < 1) {
             return false;
         }
@@ -112,6 +153,17 @@ public class UserTokenDal implements BaseDal {
         sb.append("WHERE id=?");
         objects[pairs.length] = id;
 
-        return _tokenDao.update(sb.toString(), objects);
+        TI32Result result = _tokenDao.update(sb.toString(), objects);
+        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                (String) result.getFieldValue(result.fieldForId(3)),
+                ZExceptionHandler.State.SQL
+            );
+            throw tzex;
+        }
+        
+        return (int) result.getFieldValue(result.fieldForId(2)) > 0;
     }
 }

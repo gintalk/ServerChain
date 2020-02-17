@@ -4,7 +4,7 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-import com.vng.zing.engine.sql.exception.ZException;
+import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.resource.thrift.Authenticator;
 import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.User;
@@ -23,8 +23,8 @@ public class TAuthenticatorHandler implements Authenticator.Iface {
 
         try {
             return TAuthenticatorModel.INSTANCE.authenticate(username, password);
-        } catch (ZException ex) {
-            throw new TZException(ex);
+//        } catch (ZExceptionHandler ex) {
+//            throw new TZException(ex);
         } finally {
 //            Profiler.closeThreadProfiler();
         }

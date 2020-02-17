@@ -7,11 +7,13 @@ package com.vng.zing.serverchain.model;
 import org.apache.log4j.Logger;
 
 import com.vng.zing.engine.dal.UserDal;
-import com.vng.zing.engine.sql.exception.ZException;
+import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.engine.type.Pair;
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.resource.thrift.UserType;
+import com.vng.zing.serverchain.utils.Utils;
 
 /**
  *
@@ -26,7 +28,7 @@ public class TApplicationModel {
 
     }
 
-    public User upgrade(User user) throws ZException {
+    public User upgrade(User user) throws TZException {
         if (user == null) {
             return user;
         }
@@ -35,14 +37,20 @@ public class TApplicationModel {
         if (type == UserType.findByValue(0)) {
             boolean success = UserDal.INSTANCE.updateItem(
                 (int) user.getFieldValue(user.fieldForId(1)),
-                new Pair("type", "PREMIUM")
+                new Pair("type", Utils.toString(UserType.findByValue(1)))
             );
 
             if (success) {
                 user.setFieldValue(user.fieldForId(3), UserType.findByValue(1));
             }
         } else {
-            throw new ZException("Unable to upgrade further!", ZException.State.MAXIMUM_PRIVILEGE);
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                ZExceptionHandler.State.MAXIMUM_PRIVILEGE
+            );
+            throw tzex;
+//            throw new ZExceptionHandler("Unable to upgrade further!", ZExceptionHandler.State.MAXIMUM_PRIVILEGE);
         }
 
         return user;

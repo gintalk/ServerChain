@@ -10,8 +10,9 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.engine.dal.UserDal;
 import com.vng.zing.engine.dal.UserTokenDal;
-import com.vng.zing.engine.sql.exception.ZException;
+import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.Token;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.resource.thrift.UserType;
@@ -30,7 +31,7 @@ public class TAccountModel {
 
     }
 
-    public void add(Token token, User user) throws ZException {
+    public void add(Token token, User user) throws TZException {
         if (token == null || user == null) {
             return;
         }
@@ -46,20 +47,40 @@ public class TAccountModel {
 
             if (!UserDal.INSTANCE.addItem(tokenAutoKey, name, type, joinDate)) {
                 UserTokenDal.INSTANCE.removeItem(tokenAutoKey);
-                throw new ZException("Add user failed", ZException.State.ADD_USER_FAILED);
+
+                TZException tzex = new TZException();
+                ZExceptionHandler.INSTANCE.prepareException(
+                    tzex,
+                    "Add user failed",
+                    ZExceptionHandler.State.ADD_USER_FAILED
+                );
+                throw tzex;
+//                throw new ZExceptionHandler("Add user failed", ZExceptionHandler.State.ADD_USER_FAILED);
             }
         } else {
-            throw new ZException("Add token failed", ZException.State.ADD_TOKEN_FAILED);
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                ZExceptionHandler.State.ADD_TOKEN_FAILED
+            );
+            throw tzex;
+//            throw new ZExceptionHandler("Add token failed", ZExceptionHandler.State.ADD_TOKEN_FAILED);
         }
     }
 
-    public void remove(int id) throws ZException {
+    public void remove(int id) throws TZException {
         if (id < 1) {
             return;
         }
 
         if (!UserTokenDal.INSTANCE.removeItem(id)) {
-            throw new ZException("Remove token failed", ZException.State.REMOVE_TOKEN_FAILED);
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                ZExceptionHandler.State.REMOVE_TOKEN_FAILED
+            );
+            throw tzex;
+//            throw new ZExceptionHandler("Remove token failed", ZExceptionHandler.State.REMOVE_TOKEN_FAILED);
         }
     }
 

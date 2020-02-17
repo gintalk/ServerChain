@@ -10,8 +10,9 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.engine.dal.UserDal;
 import com.vng.zing.engine.dal.UserTokenDal;
-import com.vng.zing.engine.sql.exception.ZException;
+import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.serverchain.utils.Utils;
 
@@ -28,16 +29,29 @@ public class TAuthenticatorModel {
 
     }
 
-    public User authenticate(String username, String password) throws ZException {
+    public User authenticate(String username, String password) throws TZException {
         HashMap<String, Object> tokenMap = UserTokenDal.INSTANCE.getItemAsMap(username);
         if (tokenMap == null
             || !Utils.md5(password).equals(tokenMap.get("password"))) {
-            throw new ZException("Incorrect username or password", ZException.State.INVALID_TOKEN);
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                ZExceptionHandler.State.INVALID_TOKEN
+            );
+            throw tzex;
+//            throw new ZExceptionHandler("Incorrect username or password", ZExceptionHandler.State.INVALID_TOKEN);
         }
 
+        
         HashMap<String, Object> userMap = UserDal.INSTANCE.getItemAsMap((int) tokenMap.get("id"));
         if (userMap == null) {
-            throw new ZException("User does not exist", ZException.State.MISSING_USER);
+            TZException tzex = new TZException();
+            ZExceptionHandler.INSTANCE.prepareException(
+                tzex,
+                ZExceptionHandler.State.MISSING_USER
+            );
+            throw tzex;
+//            throw new ZExceptionHandler("User does not exist", ZExceptionHandler.State.MISSING_USER);
         }
 
         return Utils.mapToUser(userMap);

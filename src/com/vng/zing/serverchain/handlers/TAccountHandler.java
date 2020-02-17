@@ -4,7 +4,6 @@
  */
 package com.vng.zing.serverchain.handlers;
 
-import com.vng.zing.engine.sql.exception.ZException;
 import com.vng.zing.resource.thrift.Account;
 import com.vng.zing.resource.thrift.TZException;
 import com.vng.zing.resource.thrift.Token;
@@ -24,8 +23,8 @@ public class TAccountHandler implements Account.Iface {
 
         try {
             TAccountModel.INSTANCE.add(token, user);
-        } catch (ZException ex) {
-            throw new TZException(ex);
+//        } catch (ZExceptionHandler ex) {
+//            throw new TZException(ex);
         } finally {
 //            Profiler.closeThreadProfiler();
         }
@@ -37,8 +36,8 @@ public class TAccountHandler implements Account.Iface {
 
         try {
             TAccountModel.INSTANCE.remove(uId);
-        } catch (ZException ex) {
-            throw new TZException(ex);
+//        } catch (ZExceptionHandler ex) {
+//            throw new TZException(ex);
         } finally {
 //            Profiler.closeThreadProfiler();
         }
