@@ -7,8 +7,10 @@ package com.vng.zing.serverchain.model;
 import com.vng.zing.engine.dal.TokenDal;
 import com.vng.zing.engine.dal.UserDal;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.TUserResult;
+import com.vng.zing.thrift.resource.TUserResult;
 import com.vng.zing.serverchain.utils.Utils;
+import com.vng.zing.stats.Profiler;
+import com.vng.zing.stats.ThreadProfiler;
 import com.vng.zing.zcommon.thrift.ECode;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
@@ -27,6 +29,9 @@ public class TReadServiceModel {
     }
 
     public TUserResult authenticate(String username, String password) {
+        
+        ThreadProfiler profiler = Profiler.getThreadProfiler();
+        
         TUserResult result = new TUserResult();
 
         HashMap<String, Object> tokenMap = TokenDal.INSTANCE.getItemAsMap(username, password);

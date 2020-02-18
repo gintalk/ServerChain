@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.User;
+import com.vng.zing.thrift.resource.User;
 import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.zcommon.thrift.ECode;
 

@@ -9,8 +9,8 @@ import java.util.Map;
 
 import org.rythmengine.Rythm;
 
-import com.vng.zing.resource.thrift.TReadService;
-import com.vng.zing.resource.thrift.TWriteService;
+import com.vng.zing.thrift.resource.TReadService;
+import com.vng.zing.thrift.resource.TWriteService;
 import com.vng.zing.serverchain.handlers.TReadServiceHandler;
 import com.vng.zing.serverchain.handlers.TWriteServiceHandler;
 import com.vng.zing.serverchain.servers.HServers;
@@ -39,24 +39,24 @@ public class MainApp {
         }
 
         ///
-        ///thrift servers: Read
+        ///thrift servers: TRead
         ///
         TServers tReadServers = new TServers(
             new TReadService.Processor(new TReadServiceHandler()),
             "ReadService");
         if (!tReadServers.setupAndStart()) {
-            System.err.println("Could not start thrift authenticator servers! Exit now.");
+            System.err.println("Could not start TRead servers! Exit now.");
             System.exit(1);
         }
 
         ///
-        ///thrift servers: Write
+        ///thrift servers: TWrite
         ///
         TServers tWriteServers = new TServers(
             new TWriteService.Processor(new TWriteServiceHandler()),
             "WriteService");
         if (!tWriteServers.setupAndStart()) {
-            System.err.println("Could not start thrift application servers! Exit now.");
+            System.err.println("Could not start TWrite servers! Exit now.");
             System.exit(1);
         }
     }

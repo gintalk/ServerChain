@@ -12,11 +12,11 @@ import com.vng.zing.engine.dal.TokenDal;
 import com.vng.zing.engine.dal.UserDal;
 import com.vng.zing.engine.type.KVPair;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.TI32Result;
-import com.vng.zing.resource.thrift.TUserResult;
-import com.vng.zing.resource.thrift.Token;
-import com.vng.zing.resource.thrift.User;
-import com.vng.zing.resource.thrift.UserType;
+import com.vng.zing.thrift.resource.TI32Result;
+import com.vng.zing.thrift.resource.TUserResult;
+import com.vng.zing.thrift.resource.Token;
+import com.vng.zing.thrift.resource.User;
+import com.vng.zing.thrift.resource.UserType;
 import com.vng.zing.serverchain.utils.Utils;
 import com.vng.zing.zcommon.thrift.ECode;
 

@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 import com.vng.zing.configer.ZConfig;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.CommonUtils;
-import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.thrift.resource.TI32Result;
 import com.vng.zing.zcommon.thrift.ECode;
 
 /**
@@ -155,7 +155,6 @@ public abstract class MySqlDao {
                 }
             }
 
-            LOGGER.debug(ps.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 result = deserializeAsListMap(rs);
             }

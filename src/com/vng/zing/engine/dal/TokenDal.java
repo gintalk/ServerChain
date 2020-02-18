@@ -13,7 +13,7 @@ import com.vng.zing.engine.sql.dao.TokenDao;
 import com.vng.zing.engine.type.KVPair;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.CommonUtils;
-import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.thrift.resource.TI32Result;
 import com.vng.zing.zcommon.thrift.ECode;
 
 /**

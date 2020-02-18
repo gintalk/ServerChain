@@ -3,11 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/namnh16/NetBeansProjects/ServerChain/src/com/vng/zing/engine/dal/UserDal.java</file>
-            <file>file:/home/namnh16/NetBeansProjects/ServerChain/src/com/vng/zing/engine/dal/BaseDal.java</file>
-            <file>file:/home/namnh16/NetBeansProjects/ServerChain/src/com/vng/zing/engine/dal/UserTokenDal.java</file>
-            <file>file:/home/namnh16/NetBeansProjects/ServerChain/src/com/vng/zing/engine/sql/dao/MySqlDao.java</file>
-            <file>file:/home/namnh16/NetBeansProjects/ServerChain/src/com/vng/zing/engine/sql/exception/ZExceptionHandler.java</file>
+            <file>file:/home/namnh16/NetBeansProjects/ServerChain/src/com/vng/zing/serverchain/model/TWriteServiceModel.java</file>
+            <file>file:/home/namnh16/NetBeansProjects/ServerChain/src/com/vng/zing/serverchain/model/HUpgradeModel.java</file>
             <file>file:/home/namnh16/NetBeansProjects/ServerChain/src/com/vng/zing/serverchain/app/MainApp.java</file>
         </group>
     </open-files>

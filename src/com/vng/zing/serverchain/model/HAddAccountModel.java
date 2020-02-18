@@ -11,12 +11,12 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.ServletUtils;
-import com.vng.zing.resource.thrift.TI32Result;
-import com.vng.zing.resource.thrift.TReadService;
-import com.vng.zing.resource.thrift.TUserResult;
-import com.vng.zing.resource.thrift.TWriteService;
-import com.vng.zing.resource.thrift.Token;
-import com.vng.zing.resource.thrift.User;
+import com.vng.zing.thrift.resource.TI32Result;
+import com.vng.zing.thrift.resource.TReadService;
+import com.vng.zing.thrift.resource.TUserResult;
+import com.vng.zing.thrift.resource.TWriteService;
+import com.vng.zing.thrift.resource.Token;
+import com.vng.zing.thrift.resource.User;
 import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.thriftpool.TClientFactory;
 import com.vng.zing.zcommon.thrift.ECode;
@@ -104,11 +104,10 @@ public class HAddAccountModel extends BaseModel {
                 if (updateResult.getError() != ECode.C_SUCCESS.getValue()) {
                     this.outAndClose(request, response, MessageGenerator.getMessage(updateResult.getError()));
                 } else {
-                    this.outAndClose(request, response, "Account added");
+                    response.sendRedirect("/");
                 }
 
                 clientFactory.destroyObject(writeClient);
-                response.sendRedirect("/");
             }
 
         } catch (Exception ex) {

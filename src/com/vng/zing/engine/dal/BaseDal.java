@@ -7,7 +7,7 @@ package com.vng.zing.engine.dal;
 import java.util.HashMap;
 
 import com.vng.zing.engine.type.KVPair;
-import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.thrift.resource.TI32Result;
 
 /**
  *

@@ -6,11 +6,11 @@ package com.vng.zing.serverchain.handlers;
 
 import org.apache.thrift.TException;
 
-import com.vng.zing.resource.thrift.TI32Result;
-import com.vng.zing.resource.thrift.TUserResult;
-import com.vng.zing.resource.thrift.TWriteService;
-import com.vng.zing.resource.thrift.Token;
-import com.vng.zing.resource.thrift.User;
+import com.vng.zing.thrift.resource.TI32Result;
+import com.vng.zing.thrift.resource.TUserResult;
+import com.vng.zing.thrift.resource.TWriteService;
+import com.vng.zing.thrift.resource.Token;
+import com.vng.zing.thrift.resource.User;
 import com.vng.zing.serverchain.model.TWriteServiceModel;
 
 /**

@@ -15,8 +15,8 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.User;
-import com.vng.zing.resource.thrift.UserType;
+import com.vng.zing.thrift.resource.User;
+import com.vng.zing.thrift.resource.UserType;
 
 /**
  *

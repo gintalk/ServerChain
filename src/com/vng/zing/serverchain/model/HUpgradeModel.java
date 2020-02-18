@@ -9,11 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-import com.vng.zing.common.ZErrorDef;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.TUserResult;
-import com.vng.zing.resource.thrift.TWriteService;
-import com.vng.zing.resource.thrift.User;
+import com.vng.zing.thrift.resource.TUserResult;
+import com.vng.zing.thrift.resource.TWriteService;
+import com.vng.zing.thrift.resource.User;
 import com.vng.zing.serverchain.cache.IntStringCache;
 import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.thriftpool.TClientFactory;
@@ -42,24 +41,25 @@ public class HUpgradeModel extends BaseModel {
             if (user == null) {
                 this.outAndClose(request, response, MessageGenerator.getMessage(ECode.UNLOADED));
             }
+            else{
+                TClientFactory clientFactory = new TClientFactory(
+                    new TWriteService.Client.Factory(),
+                    this.getConnectionConfig("WriteService")
+                );
+                TWriteService.Client client = (TWriteService.Client) clientFactory.makeObject();
 
-            TClientFactory clientFactory = new TClientFactory(
-                new TWriteService.Client.Factory(),
-                this.getConnectionConfig("WriteService")
-            );
-            TWriteService.Client client = (TWriteService.Client) clientFactory.makeObject();
+                TUserResult updateResult = client.upgrade(user);
+                if (updateResult.getError() != ECode.C_SUCCESS.getValue()) {
+                    this.outAndClose(request, response, MessageGenerator.getMessage(updateResult.getError()));
+                } else {
+                    IntStringCache.INSTANCE.remove(user.getId());
+                    request.getSession(false).setAttribute("user", updateResult.getValue());
+                    response.sendRedirect("/user/info");
+                }
 
-            TUserResult userResult = client.upgrade(user);
-            if (userResult.getError() == ZErrorDef.FAIL) {
-                this.outAndClose(request, response, userResult.getExtData());
-            } else {
-                IntStringCache.INSTANCE.remove(user.getId());
-                request.getSession(false).setAttribute("user", userResult.getValue());
-                this.outAndClose(request, response, "Account upgraded to PREMIUM");
+                clientFactory.destroyObject(client);
             }
-
-            clientFactory.destroyObject(client);
-            response.sendRedirect("/user/info");
+            
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
             this.outAndClose(request, response, "Unexpected error, please response");

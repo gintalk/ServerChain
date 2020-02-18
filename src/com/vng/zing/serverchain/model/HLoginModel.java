@@ -11,10 +11,12 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.ServletUtils;
-import com.vng.zing.resource.thrift.TReadService;
-import com.vng.zing.resource.thrift.TUserResult;
+import com.vng.zing.thrift.resource.TReadService;
+import com.vng.zing.thrift.resource.TUserResult;
 import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.serverchain.utils.Utils;
+import com.vng.zing.thrift.client.TClientPoolManager;
+import com.vng.zing.thrift.client.TReadServiceClient;
 import com.vng.zing.thriftpool.TClientFactory;
 import com.vng.zing.zcommon.thrift.ECode;
 
@@ -77,10 +79,12 @@ public class HLoginModel extends BaseModel {
                 new TReadService.Client.Factory(),
                 this.getConnectionConfig("ReadService")
             );
-            TReadService.Client client = (TReadService.Client) clientFactory.makeObject();
+            TReadService.Client readClient = (TReadService.Client) clientFactory.makeObject();
+            
+//            TReadServiceClient readClient = TClientPoolManager.getReadServiceClient();
 
             String encrdPassword = Utils.md5(ServletUtils.getString(request, "password", ""));
-            TUserResult queryResult = client.authenticate(
+            TUserResult queryResult = readClient.authenticate(
                 ServletUtils.getString(request, "username", ""),
                 encrdPassword
             );
@@ -91,7 +95,7 @@ public class HLoginModel extends BaseModel {
                 response.sendRedirect("/user/info");
             }
 
-            clientFactory.destroyObject(client);
+//            clientFactory.destroyObject(client);
 
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);

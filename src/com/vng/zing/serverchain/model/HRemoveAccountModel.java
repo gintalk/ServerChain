@@ -11,10 +11,10 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.ServletUtils;
-import com.vng.zing.resource.thrift.TI32Result;
-import com.vng.zing.resource.thrift.TWriteService;
-import com.vng.zing.resource.thrift.User;
-import com.vng.zing.resource.thrift.UserType;
+import com.vng.zing.thrift.resource.TI32Result;
+import com.vng.zing.thrift.resource.TWriteService;
+import com.vng.zing.thrift.resource.User;
+import com.vng.zing.thrift.resource.UserType;
 import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.thriftpool.TClientFactory;
 import com.vng.zing.zcommon.thrift.ECode;
@@ -56,11 +56,11 @@ public class HRemoveAccountModel extends BaseModel {
                         this.outAndClose(request, response, MessageGenerator.getMessage(updateResult.getError()));
                     } else {
                         this.outAndClose(request, response, "Account removed");
+                        response.sendRedirect("/user/info");
                     }
                 }
 
                 clientFactory.destroyObject(client);
-                response.sendRedirect("/user/info");
             }
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);

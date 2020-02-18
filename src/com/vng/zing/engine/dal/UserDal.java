@@ -12,8 +12,10 @@ import org.apache.log4j.Logger;
 import com.vng.zing.engine.sql.dao.UserDao;
 import com.vng.zing.engine.type.KVPair;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.thrift.resource.TI32Result;
 import com.vng.zing.serverchain.cache.IntMapCache;
+import com.vng.zing.stats.Profiler;
+import com.vng.zing.stats.ThreadProfiler;
 import com.vng.zing.zcommon.thrift.ECode;
 
 /**
@@ -33,23 +35,35 @@ public class UserDal implements BaseDal {
 
     @Override
     public HashMap<String, Object> getItemAsMap(int id) {
-        if (id < 1) {
-            return null;
-        }
-
-        HashMap<String, Object> cacheResult = IntMapCache.INSTANCE.get(id);
-        if (cacheResult == null) {
-            List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
-                "SELECT id, name, type, joinDate FROM User WHERE id=?",
-                id
-            );
-            if (rows != null) {
-                cacheResult = rows.get(0);
-                IntMapCache.INSTANCE.put(id, cacheResult);
+        ThreadProfiler profiler = Profiler.getThreadProfiler();
+        profiler.push(this.getClass(), "getItemAsMap");
+        try {
+            if (id < 1) {
+                return null;
             }
+
+            HashMap<String, Object> cacheResult = IntMapCache.INSTANCE.get(id);
+            if (cacheResult == null) {
+                List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
+                    "SELECT id, name, type, joinDate FROM User WHERE id=?",
+                    id
+                );
+                if (rows != null) {
+                    profiler.push(this.getClass(), "getItemAsMap.misscache");
+
+                    cacheResult = rows.get(0);
+                    IntMapCache.INSTANCE.put(id, cacheResult);
+                    profiler.pop(this.getClass(), "getItemAsMap.misscache");
+
+                }
+            }
+            return cacheResult;
+        } catch (Exception ex) {
+            return null;
+        } finally {
+            profiler.pop(this.getClass(), "getItemAsMap");
         }
 
-        return cacheResult;
     }
 
     @Override
