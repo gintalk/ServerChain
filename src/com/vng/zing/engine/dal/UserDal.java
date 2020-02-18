@@ -9,12 +9,12 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.vng.zing.common.ZErrorDef;
 import com.vng.zing.engine.sql.dao.UserDao;
-import com.vng.zing.engine.type.Pair;
+import com.vng.zing.engine.type.KVPair;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.media.common.thrift.TI32Result;
-import com.vng.zing.serverchain.cache.UserMapCache;
+import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.serverchain.cache.IntMapCache;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -37,7 +37,7 @@ public class UserDal implements BaseDal {
             return null;
         }
 
-        HashMap<String, Object> cacheResult = UserMapCache.INSTANCE.get(id);
+        HashMap<String, Object> cacheResult = IntMapCache.INSTANCE.get(id);
         if (cacheResult == null) {
             List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
                 "SELECT id, name, type, joinDate FROM User WHERE id=?",
@@ -45,7 +45,7 @@ public class UserDal implements BaseDal {
             );
             if (rows != null) {
                 cacheResult = rows.get(0);
-                UserMapCache.INSTANCE.put(id, cacheResult);
+                IntMapCache.INSTANCE.put(id, cacheResult);
             }
         }
 
@@ -63,52 +63,42 @@ public class UserDal implements BaseDal {
     }
 
     @Override
-    public int addItemAutoKey(Object... params) {
-        if (params == null || params.length < 4) {
-            return 0;
-        }
-
+    public TI32Result addItemAutoKey(Object... params) {
         TI32Result result = _userDao.insert(
             "INSERT INTO User VALUES(?,?,?,?)",
             true,
             params
         );
-        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
-            return 0;
+        if (result.getError() != ECode.C_SUCCESS.getValue()) {
+            LOGGER.error(result.getError());
+            LOGGER.error(result.getExtData());
         }
 
-        return result.getValue();
+        return result;
     }
 
     @Override
-    public boolean addItem(Object... params) {
-        if (params == null || params.length < 4) {
-            return false;
-        }
-
+    public TI32Result addItem(Object... params) {
         TI32Result result = _userDao.insert(
             "INSERT INTO User VALUES(?,?,?,?)",
             false,
             params
         );
-        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
-            return false;
+        if (result.getError() != ECode.C_SUCCESS.getValue()) {
+            LOGGER.error(result.getError());
+            LOGGER.error(result.getExtData());
         }
 
-        return true;
+        return result;
     }
 
     @Override
-    public boolean removeItem(int i) {
+    public TI32Result removeItem(int i) {
         throw new UnsupportedOperationException("Can only cascade row removal from UserToken");
     }
 
     @Override
-    public boolean updateItem(int id, Pair... pairs) {
-        if (id < 1 || pairs.length < 1) {
-            return false;
-        }
-
+    public TI32Result updateItem(int id, KVPair... pairs) {
         Object[] objects = new Object[pairs.length + 1];
         StringBuilder sb = new StringBuilder("UPDATE User SET ");
         for (int i = 0; i < pairs.length; i++) {
@@ -124,11 +114,13 @@ public class UserDal implements BaseDal {
         objects[pairs.length] = id;
 
         TI32Result result = _userDao.update(sb.toString(), objects);
-        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
-            return false;
+        if (result.getError() != ECode.C_SUCCESS.getValue()) {
+            LOGGER.error(result.getError());
+            LOGGER.error(result.getExtData());
+        } else {
+            IntMapCache.INSTANCE.remove(id);
         }
 
-        UserMapCache.INSTANCE.remove(id);
-        return true;
+        return result;
     }
 }

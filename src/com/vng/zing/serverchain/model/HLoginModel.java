@@ -11,10 +11,12 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.ServletUtils;
-import com.vng.zing.resource.thrift.Authenticator;
-import com.vng.zing.resource.thrift.TZException;
-import com.vng.zing.resource.thrift.User;
+import com.vng.zing.resource.thrift.TReadService;
+import com.vng.zing.resource.thrift.TUserResult;
+import com.vng.zing.serverchain.common.MessageGenerator;
+import com.vng.zing.serverchain.utils.Utils;
 import com.vng.zing.thriftpool.TClientFactory;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -24,7 +26,6 @@ public class HLoginModel extends BaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HLoginModel.class);
     public static final HLoginModel INSTANCE = new HLoginModel();
-    private static final String SERVICE_NAME = "Authenticator";
 
     private HLoginModel() {
 
@@ -48,9 +49,9 @@ public class HLoginModel extends BaseModel {
                     binProto, "Authenticator"
             );
             
-            Authenticator.Client authClient = new Authenticator.Client(mulProto);
+            Authenticator.Client client = new Authenticator.Client(mulProto);
             
-            User user = authClient.authenticate(
+            User user = client.authenticate(
                     request.getParameter("username"),
                     request.getParameter("password")
             );
@@ -73,24 +74,29 @@ public class HLoginModel extends BaseModel {
          */
         try {
             TClientFactory clientFactory = new TClientFactory(
-                new Authenticator.Client.Factory(),
-                this.getConnectionConfig(SERVICE_NAME)
+                new TReadService.Client.Factory(),
+                this.getConnectionConfig("ReadService")
             );
-            Authenticator.Client authClient = (Authenticator.Client) clientFactory.makeObject();
+            TReadService.Client client = (TReadService.Client) clientFactory.makeObject();
 
-            User user = authClient.authenticate(
+            String encrdPassword = Utils.md5(ServletUtils.getString(request, "password", ""));
+            TUserResult queryResult = client.authenticate(
                 ServletUtils.getString(request, "username", ""),
-                ServletUtils.getString(request, "password", "")
+                encrdPassword
             );
-            request.getSession(true).setAttribute("user", user);
+            if (queryResult.getError() != ECode.C_SUCCESS.getValue()) {
+                this.outAndClose(request, response, MessageGenerator.getMessage(queryResult.getError()));
+            } else {
+                request.getSession(true).setAttribute("user", queryResult.getValue());
+                response.sendRedirect("/user/info");
+            }
 
-            clientFactory.destroyObject(authClient);
-            response.sendRedirect("/user/info");
+            clientFactory.destroyObject(client);
 
-        } catch (TZException ex) {
-            this.outAndClose(request, response, ex.getWebMessage());
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
+
+            this.outAndClose(request, response, MessageGenerator.getMessage(ECode.EXCEPTION));
         } finally {
 //            Profiler.closeThreadProfiler();
         }

@@ -17,11 +17,11 @@ import java.util.List;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 
-import com.vng.zing.common.ZErrorDef;
 import com.vng.zing.configer.ZConfig;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.media.common.thrift.TI32Result;
 import com.vng.zing.media.common.utils.CommonUtils;
+import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -88,26 +88,26 @@ public abstract class MySqlDao {
                 if (returnAutoKey) {
                     try (ResultSet rs = ps.getGeneratedKeys()) {
                         if (rs.next()) {
-                            result.setError(ZErrorDef.SUCCESS);
+                            result.setError(ECode.C_SUCCESS.getValue());
                             result.setValue(rs.getInt(1));
                         } else {
-                            result.setError(ZErrorDef.FAIL);
+                            result.setError(ECode.C_EMPTY.getValue());
                             result.setExtData("ResultSet empty: auto-generated key expected");
                         }
                     }
                 } else {
-                    result.setError(ZErrorDef.SUCCESS);
+                    result.setError(ECode.C_SUCCESS.getValue());
                     result.setValue(nRows);
                 }
             } else {
-                result.setError(ZErrorDef.FAIL);
+                result.setError(ECode.UNCHANGED.getValue());
                 result.setExtData("Insert failed: 0 row effected");
             }
         } catch (SQLException ex) {
             LOGGER.error(ex.getErrorCode());
             LOGGER.error(ex.getMessage());
 
-            result.setError(ZErrorDef.FAIL);
+            result.setError(ECode.EXCEPTION.getValue());
             result.setExtData("SQLException thrown");
         }
 
@@ -126,19 +126,18 @@ public abstract class MySqlDao {
             }
 
             int nRows = ps.executeUpdate();
-            result.setFieldValue(result.fieldForId(1), ZErrorDef.SUCCESS);
             if (nRows > 0) {
-                result.setError(ZErrorDef.SUCCESS);
+                result.setError(ECode.C_SUCCESS.getValue());
                 result.setValue(nRows);
             } else {
-                result.setError(ZErrorDef.FAIL);
+                result.setError(ECode.UNCHANGED.getValue());
                 result.setExtData("Update failed: 0 row affected");
             }
         } catch (SQLException ex) {
             LOGGER.error(ex.getErrorCode());
             LOGGER.error(ex.getMessage());
 
-            result.setError(ZErrorDef.FAIL);
+            result.setError(ECode.EXCEPTION.getValue());
             result.setExtData("SQLException thrown");
         }
 
@@ -156,6 +155,7 @@ public abstract class MySqlDao {
                 }
             }
 
+            LOGGER.debug(ps.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 result = deserializeAsListMap(rs);
             }

@@ -24,20 +24,37 @@ struct User{
     4: optional string joinDate;
 }
 
-exception TZException{
-    1: optional string message;
-    2: optional string webMessage;
+struct TI32Result{
+    1: required i32 error;
+    2: optional i32 value;
+    3: optional string extData;
 }
 
-service Application{
-    User upgrade(1: User user) throws(1: TZException ex);
+struct TUserResult{
+    1: required i32 error;
+    2: optional User value;
+    3: optional string extData;
 }
 
-service Account{
-    void add(1: Token token, 2: User user) throws(1: TZException ex);
-    void remove(1: i32 uId) throws(1: TZException ex);
+// service Application{
+//     TUserResult upgrade(1: User user);
+// }
+
+// service Account{
+//     TI32Result add(1: Token token, 2: User user);
+//     TI32Result remove(1: i32 uId);
+// }
+
+// service Authenticator{
+//     TUserResult authenticate(1: string username, 2: string password);
+// }
+
+service TReadService{
+    TUserResult authenticate(1: string username, 2: string password);
 }
 
-service Authenticator{
-    User authenticate(1: string username, 2: string password) throws(1: TZException ex);
+service TWriteService{
+    TUserResult upgrade(1: User user);
+    TI32Result add(1: Token token, 2: User user);
+    TI32Result remove(1: i32 uId);
 }

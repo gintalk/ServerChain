@@ -11,11 +11,15 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.ServletUtils;
-import com.vng.zing.resource.thrift.Account;
-import com.vng.zing.resource.thrift.TZException;
+import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.resource.thrift.TReadService;
+import com.vng.zing.resource.thrift.TUserResult;
+import com.vng.zing.resource.thrift.TWriteService;
 import com.vng.zing.resource.thrift.Token;
 import com.vng.zing.resource.thrift.User;
+import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.thriftpool.TClientFactory;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -25,7 +29,6 @@ public class HAddAccountModel extends BaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HAddAccountModel.class);
     public static final HAddAccountModel INSTANCE = new HAddAccountModel();
-    private static final String SERVICE_NAME = "Account";
 
     private HAddAccountModel() {
 
@@ -74,35 +77,44 @@ public class HAddAccountModel extends BaseModel {
          */
         try {
             TClientFactory clientFactory = new TClientFactory(
-                new Account.Client.Factory(),
-                this.getConnectionConfig(SERVICE_NAME)
+                new TReadService.Client.Factory(),
+                this.getConnectionConfig("ReadService")
             );
-            Account.Client accClient = (Account.Client) clientFactory.makeObject();
+            TReadService.Client readClient = (TReadService.Client) clientFactory.makeObject();
 
-            Token token = new Token();
-            token.setFieldValue(
-                token.fieldForId(1),
-                ServletUtils.getString(request, "username", "")
-            );
-            token.setFieldValue(
-                token.fieldForId(2),
-                ServletUtils.getString(request, "password", "")
-            );
+            TUserResult queryResult = readClient.authenticate(ServletUtils.getString(request, "username", ""), "");
+            if (queryResult.getError() == ECode.C_SUCCESS.getValue()) {
+                this.outAndClose(request, response, MessageGenerator.getMessage(ECode.ALREADY_EXIST));
+            } else {
+                clientFactory.destroyObject(readClient);
+                clientFactory = new TClientFactory(
+                    new TWriteService.Client.Factory(),
+                    this.getConnectionConfig("WriteService")
+                );
+                TWriteService.Client writeClient = (TWriteService.Client) clientFactory.makeObject();
 
-            User user = new User();
-            user.setFieldValue(
-                user.fieldForId(2),
-                ServletUtils.getString(request, "name", "")
-            );
-            accClient.add(token, user);
+                Token token = new Token();
+                token.setUsername(ServletUtils.getString(request, "username", ""));
+                token.setPassword(ServletUtils.getString(request, "password", ""));
 
-            clientFactory.destroyObject(accClient);
-            response.sendRedirect("/");
+                User user = new User();
+                user.setName(ServletUtils.getString(request, "name", ""));
 
-        } catch (TZException ex) {
-            this.outAndClose(request, response, ex.getWebMessage());
+                TI32Result updateResult = writeClient.add(token, user);
+                if (updateResult.getError() != ECode.C_SUCCESS.getValue()) {
+                    this.outAndClose(request, response, MessageGenerator.getMessage(updateResult.getError()));
+                } else {
+                    this.outAndClose(request, response, "Account added");
+                }
+
+                clientFactory.destroyObject(writeClient);
+                response.sendRedirect("/");
+            }
+
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
+
+            this.outAndClose(request, response, MessageGenerator.getMessage(ECode.EXCEPTION));
         } finally {
 //            Profiler.closeThreadProfiler();
         }

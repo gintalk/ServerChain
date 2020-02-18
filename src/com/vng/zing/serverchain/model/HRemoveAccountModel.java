@@ -11,11 +11,13 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.ServletUtils;
-import com.vng.zing.resource.thrift.Account;
-import com.vng.zing.resource.thrift.TZException;
+import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.resource.thrift.TWriteService;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.resource.thrift.UserType;
+import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.thriftpool.TClientFactory;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -25,7 +27,6 @@ public class HRemoveAccountModel extends BaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HRemoveAccountModel.class);
     public static final HRemoveAccountModel INSTANCE = new HRemoveAccountModel();
-    private static final String SERVICE_NAME = "Account";
 
     private HRemoveAccountModel() {
 
@@ -36,12 +37,37 @@ public class HRemoveAccountModel extends BaseModel {
 //        ThreadProfiler profiler = Profiler.getThreadProfiler();
         this.prepareHeaderHtml(response);
 
-        User user = (User) request.getSession(false).getAttribute("user");
-        if (user == null) {
-            this.outAndClose(request, response, "Must log in first");
-        } else if (user.getType() != UserType.ADMIN) {
-            this.outAndClose(request, response, "Reserved for ADMIN");
-        } /* Switch to this block if servers are running on top of HTTPS
+        try {
+            User user = (User) request.getSession(false).getAttribute("user");
+            if (user == null) {
+                this.outAndClose(request, response, MessageGenerator.getMessage(ECode.UNLOADED));
+            } else if (user.getType() != UserType.ADMIN) {
+                this.outAndClose(request, response, MessageGenerator.getMessage(ECode.NOT_ALLOW));
+            } else {
+                TClientFactory clientFactory = new TClientFactory(
+                    new TWriteService.Client.Factory(),
+                    this.getConnectionConfig("WriteService")
+                );
+                TWriteService.Client client = (TWriteService.Client) clientFactory.makeObject();
+
+                if (!"".equals(ServletUtils.getString(request, "id", ""))) {
+                    TI32Result updateResult = client.remove(Integer.parseInt(ServletUtils.getString(request, "id", "")));
+                    if (updateResult.getError() != ECode.C_SUCCESS.getValue()) {
+                        this.outAndClose(request, response, MessageGenerator.getMessage(updateResult.getError()));
+                    } else {
+                        this.outAndClose(request, response, "Account removed");
+                    }
+                }
+
+                clientFactory.destroyObject(client);
+                response.sendRedirect("/user/info");
+            }
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage(), ex);
+
+            this.outAndClose(request, response, MessageGenerator.getMessage(ECode.EXCEPTION));
+        }
+        /* Switch to this block if servers are running on top of HTTPS
         else{
             TSSLTransportFactory.TSSLTransportParameters params =
                 new TSSLTransportFactory.TSSLTransportParameters();
@@ -55,10 +81,10 @@ public class HRemoveAccountModel extends BaseModel {
                         binProto, "Account"
                 );
 
-                Account.Client accClient = new Account.Client(mulProto);
+                Account.Client client = new Account.Client(mulProto);
 
                 if(!"".equals(request.getParameter("id"))){
-                    accClient.remove(Integer.parseInt(request.getParameter("id")));
+                    client.remove(Integer.parseInt(request.getParameter("id")));
                 }
                 
                 response.sendRedirect("/user/info");
@@ -74,26 +100,7 @@ public class HRemoveAccountModel extends BaseModel {
             catch (TException ex) {
                 _Logger.error(ex.getMessage(), ex);
             }
-        }
-         */ else {
-            try {
-                TClientFactory clientFactory = new TClientFactory(
-                    new Account.Client.Factory(),
-                    this.getConnectionConfig(SERVICE_NAME)
-                );
-                Account.Client accClient = (Account.Client) clientFactory.makeObject();
+        }*/
 
-                if (!"".equals(request.getParameter("id"))) {
-                    accClient.remove(Integer.parseInt(
-                        ServletUtils.getString(request, "id", "")));
-                }
-                response.sendRedirect("/user/info");
-
-            } catch (TZException ex) {
-                this.outAndClose(request, response, ex.getWebMessage());
-            } catch (Exception ex) {
-                LOGGER.error(ex.getMessage(), ex);
-            }
-        }
     }
 }

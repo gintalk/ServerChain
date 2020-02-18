@@ -9,12 +9,12 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.vng.zing.common.ZErrorDef;
 import com.vng.zing.engine.sql.dao.TokenDao;
-import com.vng.zing.engine.type.Pair;
+import com.vng.zing.engine.type.KVPair;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.media.common.thrift.TI32Result;
 import com.vng.zing.media.common.utils.CommonUtils;
+import com.vng.zing.resource.thrift.TI32Result;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -55,10 +55,6 @@ public class TokenDal implements BaseDal {
 
     @Override
     public HashMap<String, Object> getItemAsMap(String username, String password) {
-        if (CommonUtils.isEmpty(username)) {
-            return null;
-        }
-
         StringBuilder sql = new StringBuilder("SELECT id, username, password FROM UserToken WHERE username=?");
         List<HashMap<String, Object>> rows;
         if (!CommonUtils.isEmpty(password)) {
@@ -75,64 +71,51 @@ public class TokenDal implements BaseDal {
     }
 
     @Override
-    public int addItemAutoKey(Object... params) {
-        if (params == null || params.length < 2) {
-            return 0;
-        }
-
+    public TI32Result addItemAutoKey(Object... params) {
         TI32Result result = _tokenDao.insert(
             "INSERT INTO UserToken(username, password) VALUES(?,?)",
             true,
             params
         );
-        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
-            return 0;
+        if (result.getError() != ECode.C_SUCCESS.getValue()) {
+            LOGGER.error(result.getError());
+            LOGGER.error(result.getExtData());
         }
 
-        return result.getValue();
+        return result;
     }
 
     @Override
-    public boolean addItem(Object... params) {
-        if (params == null || params.length < 2) {
-            return false;
-        }
-
+    public TI32Result addItem(Object... params) {
         TI32Result result = _tokenDao.insert(
             "INSERT INTO UserToken(username, password) VALUES(?,?)",
             false,
             params
         );
-        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
-            return false;
+        if (result.getError() != ECode.C_SUCCESS.getValue()) {
+            LOGGER.error(result.getError());
+            LOGGER.error(result.getExtData());
         }
 
-        return true;
+        return result;
     }
 
     @Override
-    public boolean removeItem(int id) {
-        if (id < 1) {
-            return false;
-        }
-
+    public TI32Result removeItem(int id) {
         TI32Result result = _tokenDao.update(
             "DELETE FROM UserToken WHERE id=?",
             id
         );
-        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
-            return false;
+        if (result.getError() != ECode.C_SUCCESS.getValue()) {
+            LOGGER.error(result.getError());
+            LOGGER.error(result.getExtData());
         }
 
-        return true;
+        return result;
     }
 
     @Override
-    public boolean updateItem(int id, Pair... pairs) {
-        if (id < 1 || pairs.length < 1) {
-            return false;
-        }
-
+    public TI32Result updateItem(int id, KVPair... pairs) {
         Object[] objects = new Object[pairs.length + 1];
         StringBuilder sb = new StringBuilder("UPDATE UserToken SET ");
         for (int i = 0; i < pairs.length; i++) {
@@ -148,10 +131,11 @@ public class TokenDal implements BaseDal {
         objects[pairs.length] = id;
 
         TI32Result result = _tokenDao.update(sb.toString(), objects);
-        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
-            return false;
+        if (result.getError() != ECode.C_SUCCESS.getValue()) {
+            LOGGER.error(result.getError());
+            LOGGER.error(result.getExtData());
         }
 
-        return true;
+        return result;
     }
 }

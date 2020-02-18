@@ -9,11 +9,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.vng.zing.common.ZErrorDef;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.resource.thrift.Application;
-import com.vng.zing.resource.thrift.TZException;
+import com.vng.zing.resource.thrift.TUserResult;
+import com.vng.zing.resource.thrift.TWriteService;
 import com.vng.zing.resource.thrift.User;
+import com.vng.zing.serverchain.cache.IntStringCache;
+import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.thriftpool.TClientFactory;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -23,7 +27,6 @@ public class HUpgradeModel extends BaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HUpgradeModel.class);
     public static final HUpgradeModel INSTANCE = new HUpgradeModel();
-    private static final String SERVICE_NAME = "Application";
 
     private HUpgradeModel() {
 
@@ -34,10 +37,36 @@ public class HUpgradeModel extends BaseModel {
 //        ThreadProfiler profiler = Profiler.getThreadProfiler();
         this.prepareHeaderHtml(response);
 
-        User user = (User) request.getSession(false).getAttribute("user");
-        if (user == null) {
-            this.outAndClose(request, response, "Must log in first");
-        } /* Switch to this block if servers are running on top of HTTPS
+        try {
+            User user = (User) request.getSession(false).getAttribute("user");
+            if (user == null) {
+                this.outAndClose(request, response, MessageGenerator.getMessage(ECode.UNLOADED));
+            }
+
+            TClientFactory clientFactory = new TClientFactory(
+                new TWriteService.Client.Factory(),
+                this.getConnectionConfig("WriteService")
+            );
+            TWriteService.Client client = (TWriteService.Client) clientFactory.makeObject();
+
+            TUserResult userResult = client.upgrade(user);
+            if (userResult.getError() == ZErrorDef.FAIL) {
+                this.outAndClose(request, response, userResult.getExtData());
+            } else {
+                IntStringCache.INSTANCE.remove(user.getId());
+                request.getSession(false).setAttribute("user", userResult.getValue());
+                this.outAndClose(request, response, "Account upgraded to PREMIUM");
+            }
+
+            clientFactory.destroyObject(client);
+            response.sendRedirect("/user/info");
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage(), ex);
+            this.outAndClose(request, response, "Unexpected error, please response");
+        } finally {
+//                Profiler.closeThreadProfiler();
+        }
+        /* Switch to this block if servers are running on top of HTTPS
         else{
             TSSLTransportFactory.TSSLTransportParameters params =
                 new TSSLTransportFactory.TSSLTransportParameters();
@@ -51,9 +80,9 @@ public class HUpgradeModel extends BaseModel {
                         binProto, "App"
                 );
 
-                App.Client appClient = new App.Client(mulProto);
+                App.Client client = new App.Client(mulProto);
 
-                session.setAttribute("user", appClient.upgrade(user));
+                session.setAttribute("user", client.upgrade(user));
                 
                 response.sendRedirect("/user/info");
             } catch (DatabaseException ex) {
@@ -61,26 +90,7 @@ public class HUpgradeModel extends BaseModel {
             } catch (TException ex) {
                 java.util.logging.Logger.getLogger(ShowInfoServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }*/ else {
-            try {
-                TClientFactory clientFactory = new TClientFactory(
-                    new Application.Client.Factory(),
-                    this.getConnectionConfig(SERVICE_NAME)
-                );
-                Application.Client appClient = (Application.Client) clientFactory.makeObject();
+        }*/
 
-                request.getSession(false).setAttribute("user", appClient.upgrade(user));
-
-                clientFactory.destroyObject(appClient);
-                response.sendRedirect("/user/info");
-
-            } catch (TZException ex) {
-                this.outAndClose(request, response, ex.getWebMessage());
-            } catch (Exception ex) {
-                LOGGER.error(ex.getMessage(), ex);
-            } finally {
-//                Profiler.closeThreadProfiler();
-            }
-        }
     }
 }

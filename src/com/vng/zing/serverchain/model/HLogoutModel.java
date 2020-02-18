@@ -4,14 +4,15 @@
  */
 package com.vng.zing.serverchain.model;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.resource.thrift.User;
+import com.vng.zing.serverchain.common.MessageGenerator;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -21,7 +22,6 @@ public class HLogoutModel extends BaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HLogoutModel.class);
     public static final HLogoutModel INSTANCE = new HLogoutModel();
-//    private  static final String SERVICE_NAME = "Authenticator";
 
     private HLogoutModel() {
 
@@ -33,13 +33,20 @@ public class HLogoutModel extends BaseModel {
         this.prepareHeaderHtml(response);
 
         try {
-            request.getSession(false).invalidate();
-            response.sendRedirect("/");
-
-        } catch (IOException ex) {
+            User user = (User) request.getSession(false).getAttribute("user");
+            if (user == null) {
+                this.outAndClose(request, response, MessageGenerator.getMessage(ECode.UNLOADED));
+            } else {
+                request.getSession(false).invalidate();
+                response.sendRedirect("/");
+            }
+        } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
+
+            this.outAndClose(request, response, MessageGenerator.getMessage(ECode.EXCEPTION));
+
         } finally {
-//            Profiler.closeThreadProfiler();
+            //            Profiler.closeThreadProfiler();
         }
     }
 }

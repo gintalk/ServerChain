@@ -9,12 +9,10 @@ import java.util.Map;
 
 import org.rythmengine.Rythm;
 
-import com.vng.zing.resource.thrift.Account;
-import com.vng.zing.resource.thrift.Application;
-import com.vng.zing.resource.thrift.Authenticator;
-import com.vng.zing.serverchain.handlers.TAccountHandler;
-import com.vng.zing.serverchain.handlers.TApplicationHandler;
-import com.vng.zing.serverchain.handlers.TAuthenticatorHandler;
+import com.vng.zing.resource.thrift.TReadService;
+import com.vng.zing.resource.thrift.TWriteService;
+import com.vng.zing.serverchain.handlers.TReadServiceHandler;
+import com.vng.zing.serverchain.handlers.TWriteServiceHandler;
 import com.vng.zing.serverchain.servers.HServers;
 import com.vng.zing.serverchain.servers.TServers;
 
@@ -41,35 +39,24 @@ public class MainApp {
         }
 
         ///
-        ///thrift servers: Authenticator
+        ///thrift servers: Read
         ///
-        TServers tAuthServers = new TServers(
-            new Authenticator.Processor(new TAuthenticatorHandler()),
-            "Authenticator");
-        if (!tAuthServers.setupAndStart()) {
+        TServers tReadServers = new TServers(
+            new TReadService.Processor(new TReadServiceHandler()),
+            "ReadService");
+        if (!tReadServers.setupAndStart()) {
             System.err.println("Could not start thrift authenticator servers! Exit now.");
             System.exit(1);
         }
 
         ///
-        ///thrift servers: Application
+        ///thrift servers: Write
         ///
-        TServers tAppServers = new TServers(
-            new Application.Processor(new TApplicationHandler()),
-            "Application");
-        if (!tAppServers.setupAndStart()) {
+        TServers tWriteServers = new TServers(
+            new TWriteService.Processor(new TWriteServiceHandler()),
+            "WriteService");
+        if (!tWriteServers.setupAndStart()) {
             System.err.println("Could not start thrift application servers! Exit now.");
-            System.exit(1);
-        }
-
-        ///
-        ///thrift servers: Account
-        ///
-        TServers tAccServers = new TServers(
-            new Account.Processor(new TAccountHandler()),
-            "Account");
-        if (!tAccServers.setupAndStart()) {
-            System.err.println("Could not start thrift account servers! Exit now.");
             System.exit(1);
         }
     }

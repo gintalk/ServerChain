@@ -6,7 +6,8 @@ package com.vng.zing.engine.dal;
 
 import java.util.HashMap;
 
-import com.vng.zing.engine.type.Pair;
+import com.vng.zing.engine.type.KVPair;
+import com.vng.zing.resource.thrift.TI32Result;
 
 /**
  *
@@ -23,11 +24,11 @@ public interface BaseDal {
 
     public HashMap<String, Object> getItemAsMap(String s, String ss);
 
-    public int addItemAutoKey(Object... params);
+    public TI32Result addItemAutoKey(Object... params);
 
-    public boolean addItem(Object... params);
+    public TI32Result addItem(Object... params);
 
-    public boolean removeItem(int i);
+    public TI32Result removeItem(int i);
 
-    public boolean updateItem(int i, Pair... pairs);
+    public TI32Result updateItem(int i, KVPair... pairs);
 }

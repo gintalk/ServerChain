@@ -16,7 +16,10 @@ import org.rythmengine.utils.NamedParams;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.resource.thrift.User;
 import com.vng.zing.resource.thrift.UserType;
+import com.vng.zing.serverchain.cache.IntStringCache;
+import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.serverchain.utils.Utils;
+import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
@@ -26,7 +29,6 @@ public class HShowInfoModel extends BaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HShowInfoModel.class);
     public static final HShowInfoModel INSTANCE = new HShowInfoModel();
-//    private static final String SERVICE_NAME = "Application";
 
     private HShowInfoModel() {
 
@@ -39,10 +41,21 @@ public class HShowInfoModel extends BaseModel {
 
         try {
             User user = (User) request.getSession(false).getAttribute("user");
-            this.outAndClose(request, response, this.getInfoString(user));
+            if (user == null) {
+                this.outAndClose(request, response, MessageGenerator.getMessage(ECode.UNLOADED));
+            } else {
+                String cacheResult = IntStringCache.INSTANCE.get(user.getId());
+                if (cacheResult == null) {
+                    cacheResult = this.getInfoString(user);
+                    IntStringCache.INSTANCE.put(user.getId(), cacheResult);
+                }
+                this.outAndClose(request, response, cacheResult);
+            }
 
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
+
+            this.outAndClose(request, response, MessageGenerator.getMessage(ECode.EXCEPTION));
         } finally {
 //            Profiler.closeThreadProfiler();
         }
