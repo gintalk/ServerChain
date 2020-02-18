@@ -8,8 +8,8 @@ import java.sql.Date;
 
 import org.apache.log4j.Logger;
 
+import com.vng.zing.engine.dal.TokenDal;
 import com.vng.zing.engine.dal.UserDal;
-import com.vng.zing.engine.dal.UserTokenDal;
 import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.resource.thrift.TZException;
@@ -39,19 +39,18 @@ public class TAccountModel {
         String username = (String) token.getFieldValue(token.fieldForId(1));
         String password = Utils.md5((String) token.getFieldValue(token.fieldForId(2)));
 
-        int tokenAutoKey = UserTokenDal.INSTANCE.addItemAutoKey(username, password);
+        int tokenAutoKey = TokenDal.INSTANCE.addItemAutoKey(username, password);
         if (tokenAutoKey > 0) {
             String name = (String) user.getFieldValue(user.fieldForId(2));
             String type = Utils.toString(UserType.REGULAR);
             Date joinDate = Utils.getCurrentSQLDate();
 
             if (!UserDal.INSTANCE.addItem(tokenAutoKey, name, type, joinDate)) {
-                UserTokenDal.INSTANCE.removeItem(tokenAutoKey);
+                TokenDal.INSTANCE.removeItem(tokenAutoKey);
 
                 TZException tzex = new TZException();
                 ZExceptionHandler.INSTANCE.prepareException(
                     tzex,
-                    "Add user failed",
                     ZExceptionHandler.State.ADD_USER_FAILED
                 );
                 throw tzex;
@@ -73,7 +72,7 @@ public class TAccountModel {
             return;
         }
 
-        if (!UserTokenDal.INSTANCE.removeItem(id)) {
+        if (!TokenDal.INSTANCE.removeItem(id)) {
             TZException tzex = new TZException();
             ZExceptionHandler.INSTANCE.prepareException(
                 tzex,

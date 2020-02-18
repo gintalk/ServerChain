@@ -4,22 +4,25 @@
  */
 package com.vng.zing.engine.dal;
 
-import com.vng.zing.common.ZErrorDef;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
+import com.vng.zing.common.ZErrorDef;
 import com.vng.zing.engine.sql.dao.UserDao;
-import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.engine.type.Pair;
+import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.thrift.TI32Result;
-import com.vng.zing.resource.thrift.TZException;
+import com.vng.zing.serverchain.cache.UserMapCache;
 
 /**
  *
  * @author namnh16
  */
 public class UserDal implements BaseDal {
-//    private static final Logger LOGGER = ZLogger.getLogger(UserDal.class);
+
+    private static final Logger LOGGER = ZLogger.getLogger(UserDal.class);
 
     private final UserDao _userDao;
     public static final UserDal INSTANCE = new UserDal();
@@ -29,29 +32,38 @@ public class UserDal implements BaseDal {
     }
 
     @Override
-    public HashMap<String, Object> getItemAsMap(int id) throws TZException {
+    public HashMap<String, Object> getItemAsMap(int id) {
         if (id < 1) {
             return null;
         }
 
-        List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
-            "SELECT id, name, type, joinDate FROM User WHERE id=?",
-            id
-        );
-        if (rows != null) {
-            return rows.get(0);
+        HashMap<String, Object> cacheResult = UserMapCache.INSTANCE.get(id);
+        if (cacheResult == null) {
+            List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
+                "SELECT id, name, type, joinDate FROM User WHERE id=?",
+                id
+            );
+            if (rows != null) {
+                cacheResult = rows.get(0);
+                UserMapCache.INSTANCE.put(id, cacheResult);
+            }
         }
 
-        return null;
+        return cacheResult;
     }
 
     @Override
-    public HashMap<String, Object> getItemAsMap(String name) throws TZException {
+    public HashMap<String, Object> getItemAsMap(String s) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public int addItemAutoKey(Object... params) throws TZException {
+    public HashMap<String, Object> getItemAsMap(String s, String ss) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int addItemAutoKey(Object... params) {
         if (params == null || params.length < 4) {
             return 0;
         }
@@ -61,21 +73,15 @@ public class UserDal implements BaseDal {
             true,
             params
         );
-        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
-            TZException tzex = new TZException();
-            ZExceptionHandler.INSTANCE.prepareException(
-                tzex,
-                (String) result.getFieldValue(result.fieldForId(3)),
-                ZExceptionHandler.State.SQL
-            );
-            throw tzex;
+        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
+            return 0;
         }
-        
-        return (int) result.getFieldValue(result.fieldForId(2));
+
+        return result.getValue();
     }
 
     @Override
-    public boolean addItem(Object... params) throws TZException {
+    public boolean addItem(Object... params) {
         if (params == null || params.length < 4) {
             return false;
         }
@@ -85,26 +91,20 @@ public class UserDal implements BaseDal {
             false,
             params
         );
-        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
-            TZException tzex = new TZException();
-            ZExceptionHandler.INSTANCE.prepareException(
-                tzex,
-                (String) result.getFieldValue(result.fieldForId(3)),
-                ZExceptionHandler.State.SQL
-            );
-            throw tzex;
+        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
+            return false;
         }
-        
-        return (int) result.getFieldValue(result.fieldForId(2)) > 0;
+
+        return true;
     }
 
     @Override
-    public boolean removeItem(int i) throws TZException {
+    public boolean removeItem(int i) {
         throw new UnsupportedOperationException("Can only cascade row removal from UserToken");
     }
 
     @Override
-    public boolean updateItem(int id, Pair... pairs) throws TZException {
+    public boolean updateItem(int id, Pair... pairs) {
         if (id < 1 || pairs.length < 1) {
             return false;
         }
@@ -124,16 +124,11 @@ public class UserDal implements BaseDal {
         objects[pairs.length] = id;
 
         TI32Result result = _userDao.update(sb.toString(), objects);
-        if((int) result.getFieldValue(result.fieldForId(1)) == ZErrorDef.FAIL){
-            TZException tzex = new TZException();
-            ZExceptionHandler.INSTANCE.prepareException(
-                tzex,
-                (String) result.getFieldValue(result.fieldForId(3)),
-                ZExceptionHandler.State.SQL
-            );
-            throw tzex;
+        if (result.getError() == ZErrorDef.FAIL || result.getValue() < 1) {
+            return false;
         }
-        
-        return (int) result.getFieldValue(result.fieldForId(2)) > 0;
+
+        UserMapCache.INSTANCE.remove(id);
+        return true;
     }
 }

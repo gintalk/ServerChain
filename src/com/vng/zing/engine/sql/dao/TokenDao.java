@@ -8,10 +8,10 @@ package com.vng.zing.engine.sql.dao;
  *
  * @author namnh16
  */
-public class UserTokenDao extends MySqlDao {
+public class TokenDao extends MySqlDao {
 
-//    private static final Logger LOGGER = ZLogger.getLogger(UserTokenDao.class);
-    public UserTokenDao(String instanceName) {
+//    private static final Logger LOGGER = ZLogger.getLogger(TokenDao.class);
+    public TokenDao(String instanceName) {
         super(instanceName);
     }
 

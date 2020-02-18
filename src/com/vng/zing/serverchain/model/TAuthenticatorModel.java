@@ -8,8 +8,8 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import com.vng.zing.engine.dal.TokenDal;
 import com.vng.zing.engine.dal.UserDal;
-import com.vng.zing.engine.dal.UserTokenDal;
 import com.vng.zing.engine.sql.exception.ZExceptionHandler;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.resource.thrift.TZException;
@@ -30,7 +30,7 @@ public class TAuthenticatorModel {
     }
 
     public User authenticate(String username, String password) throws TZException {
-        HashMap<String, Object> tokenMap = UserTokenDal.INSTANCE.getItemAsMap(username);
+        HashMap<String, Object> tokenMap = TokenDal.INSTANCE.getItemAsMap(username);
         if (tokenMap == null
             || !Utils.md5(password).equals(tokenMap.get("password"))) {
             TZException tzex = new TZException();
@@ -42,7 +42,6 @@ public class TAuthenticatorModel {
 //            throw new ZExceptionHandler("Incorrect username or password", ZExceptionHandler.State.INVALID_TOKEN);
         }
 
-        
         HashMap<String, Object> userMap = UserDal.INSTANCE.getItemAsMap((int) tokenMap.get("id"));
         if (userMap == null) {
             TZException tzex = new TZException();

@@ -4,13 +4,14 @@
  */
 package com.vng.zing.engine.sql.exception;
 
+import com.vng.zing.common.ZErrorDef;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
+import com.vng.zing.media.common.thrift.TI32Result;
 import com.vng.zing.resource.thrift.TZException;
-import org.apache.thrift.TException;
 
 /**
  *
@@ -20,9 +21,9 @@ public class ZExceptionHandler {
 
     private static final Logger LOGGER = ZLogger.getLogger(ZExceptionHandler.class);
     public static final ZExceptionHandler INSTANCE = new ZExceptionHandler();
-    
-    private ZExceptionHandler(){
-        
+
+    private ZExceptionHandler() {
+
     }
 
     public enum State {
@@ -33,6 +34,8 @@ public class ZExceptionHandler {
         ADD_TOKEN_FAILED,
         ADD_USER_FAILED,
         REMOVE_TOKEN_FAILED,
+        UPDATE_TOKEN_FAILED,
+        UPDATE_USER_FAILED,
         MAXIMUM_PRIVILEGE,
     }
 
@@ -41,47 +44,55 @@ public class ZExceptionHandler {
 //        _state = state;
 //        _sqlErrorCode = sqlErrorCode;
 //    }
-    
-    public void prepareException(TZException tzex, Exception ex){
+    public void prepareException(TZException tzex, Exception ex) {
         prepareException(tzex, ex.getMessage(), State.GENERAL, -1);
     }
-    
-    public void prepareException(TZException tzex, SQLException sqlex){
+
+    public void prepareException(TZException tzex, SQLException sqlex) {
         prepareException(tzex, sqlex.getMessage(), State.SQL, sqlex.getErrorCode());
     }
-    
-    public void prepareException(TZException tzex, State state){
+
+    public void prepareException(TZException tzex, State state) {
         prepareException(tzex, "", state);
     }
-    
-    public void prepareException(TZException tzex, String message, State state){
+
+    public void prepareException(TZException tzex, String message, State state) {
         prepareException(tzex, message, state, 0);
     }
-    
-    public void prepareException(TZException tzex, String message, State state, int sqlErrorCode){
-        if(
-            state == State.SQL
-        ){
+
+    public void prepareException(TZException tzex, String message, State state, int sqlErrorCode) {
+        if (state == State.SQL) {
             LOGGER.error("SQL error code: " + sqlErrorCode);
             LOGGER.error(message);
-        }
-        else if(
-            state == State.GENERAL ||
-            state == State.MISSING_USER ||
-            state == State.ADD_USER_FAILED
-        ){
+        } else if (state == State.GENERAL
+            || state == State.MISSING_USER
+            || state == State.ADD_USER_FAILED) {
             LOGGER.error(state + ": " + message);
         }
-        
+
         String webMessage = getWebMessage(state);
         tzex.setFieldValue(tzex.fieldForId(1), message);
         tzex.setFieldValue(tzex.fieldForId(2), webMessage);
+    }
+
+    public void prepareResult(TI32Result result, SQLException ex) {
+        LOGGER.debug(ex.getMessage());
+        result.setFieldValue(result.fieldForId(1), ZErrorDef.FAIL);
+        result.setFieldValue(result.fieldForId(3), getSqlMessage(ex.getErrorCode()));
     }
 
 //    @Override
 //    public String getMessage() {
 //        return _message;
 //    }
+    private String getSqlMessage(int sqlErrorCode) {
+        switch (sqlErrorCode) {
+            case 1062:
+                return "A user with that username exist. Please choose a different username";
+            default:
+                return "Unexpected error, please report";
+        }
+    }
 
     private String getWebMessage(State state) {
         switch (state) {

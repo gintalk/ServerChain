@@ -13,18 +13,22 @@ import com.vng.zing.media.common.cache.GCacheWrapper;
  * @param <VType>: Type of value
  */
 public class BaseCache<KType, VType> {
-    
+
     private final GCacheWrapper<KType, VType> CACHE;
-    
-    protected BaseCache(){
+
+    protected BaseCache() {
         CACHE = new GCacheWrapper<>("config_info");
     }
-    
-    public void put(KType key, VType value){
+
+    public void put(KType key, VType value) {
         CACHE.put(key, value);
     }
-    
-    public VType get(KType key){
+
+    public VType get(KType key) {
         return CACHE.get(key);
+    }
+
+    public void remove(KType key) {
+        CACHE.remove(key);
     }
 }
