@@ -83,10 +83,11 @@ public class Utils {
 
     public static User mapToUser(HashMap<String, Object> userMap) {
         User user = new User();
-        user.setFieldValue(user.fieldForId(1), userMap.get("id"));
-        user.setFieldValue(user.fieldForId(2), userMap.get("name"));
-        user.setFieldValue(user.fieldForId(3), UserType.valueOf((String) userMap.get("type")));
-        user.setFieldValue(user.fieldForId(4), toString((java.sql.Date) userMap.get("joinDate")));
+        user.setId((int) userMap.get("id"));
+        user.setUsername((String) userMap.get("username"));
+        user.setName((String) userMap.get("name"));
+        user.setType(UserType.valueOf((String) userMap.get("type")));
+        user.setJoinDate(((Date) userMap.get("joinDate")).toString());
 
         return user;
     }

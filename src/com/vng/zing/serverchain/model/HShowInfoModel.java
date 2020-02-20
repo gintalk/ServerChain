@@ -14,18 +14,17 @@ import org.rythmengine.Rythm;
 import org.rythmengine.utils.NamedParams;
 
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.thrift.resource.User;
-import com.vng.zing.thrift.resource.UserType;
-import com.vng.zing.serverchain.cache.IntStringCache;
 import com.vng.zing.serverchain.common.MessageGenerator;
-import com.vng.zing.serverchain.utils.Utils;
+import com.vng.zing.stats.Profiler;
+import com.vng.zing.stats.ThreadProfiler;
+import com.vng.zing.thrift.resource.User;
 import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
  * @author namnh16
  */
-public class HShowInfoModel extends BaseModel {
+public class HShowInfoModel extends HBaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HShowInfoModel.class);
     public static final HShowInfoModel INSTANCE = new HShowInfoModel();
@@ -36,7 +35,9 @@ public class HShowInfoModel extends BaseModel {
 
     @Override
     public void process(HttpServletRequest request, HttpServletResponse response) {
-//        ThreadProfiler profiler = Profiler.getThreadProfiler();
+        ThreadProfiler profiler = Profiler.getThreadProfiler();
+        profiler.push(this.getClass(), "HShowInfoModel");
+
         this.prepareHeaderHtml(response);
 
         try {
@@ -44,12 +45,7 @@ public class HShowInfoModel extends BaseModel {
             if (user == null) {
                 this.outAndClose(request, response, MessageGenerator.getMessage(ECode.UNLOADED));
             } else {
-                String cacheResult = IntStringCache.INSTANCE.get(user.getId());
-                if (cacheResult == null) {
-                    cacheResult = this.getInfoString(user);
-                    IntStringCache.INSTANCE.put(user.getId(), cacheResult);
-                }
-                this.outAndClose(request, response, cacheResult);
+                this.outAndClose(request, response, getInfoString(user));
             }
 
         } catch (Exception ex) {
@@ -57,15 +53,15 @@ public class HShowInfoModel extends BaseModel {
 
             this.outAndClose(request, response, MessageGenerator.getMessage(ECode.EXCEPTION));
         } finally {
-//            Profiler.closeThreadProfiler();
+            profiler.pop(this.getClass(), "HShowInfoModel");
         }
     }
 
     private String getInfoString(User user) throws IOException {
-        String id = String.valueOf(user.getFieldValue(user.fieldForId(1)));
-        String name = (String) user.getFieldValue(user.fieldForId(2));
-        String type = Utils.toString((UserType) user.getFieldValue(user.fieldForId(3)));
-        String joinDate = (String) user.getFieldValue(user.fieldForId(4));
+        String id = String.valueOf(user.getId());
+        String name = user.getName();
+        String type = user.getType().toString();
+        String joinDate = user.getJoinDate();
         String privilege = ("ADMIN".equals(type)) ? "Abuse your power!" : "Upgrade";
         String privilegePath = ("ADMIN".equals(type)) ? "/template/rythm/layout/remove.html" : "/user/upgrade";
         String profilePic

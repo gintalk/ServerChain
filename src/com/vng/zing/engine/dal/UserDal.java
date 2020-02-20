@@ -13,9 +13,6 @@ import com.vng.zing.engine.sql.dao.UserDao;
 import com.vng.zing.engine.type.KVPair;
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.thrift.resource.TI32Result;
-import com.vng.zing.serverchain.cache.IntMapCache;
-import com.vng.zing.stats.Profiler;
-import com.vng.zing.stats.ThreadProfiler;
 import com.vng.zing.zcommon.thrift.ECode;
 
 /**
@@ -35,40 +32,28 @@ public class UserDal implements BaseDal {
 
     @Override
     public HashMap<String, Object> getItemAsMap(int id) {
-        ThreadProfiler profiler = Profiler.getThreadProfiler();
-        profiler.push(this.getClass(), "getItemAsMap");
-        try {
-            if (id < 1) {
-                return null;
-            }
-
-            HashMap<String, Object> cacheResult = IntMapCache.INSTANCE.get(id);
-            if (cacheResult == null) {
-                List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
-                    "SELECT id, name, type, joinDate FROM User WHERE id=?",
-                    id
-                );
-                if (rows != null) {
-                    profiler.push(this.getClass(), "getItemAsMap.misscache");
-
-                    cacheResult = rows.get(0);
-                    IntMapCache.INSTANCE.put(id, cacheResult);
-                    profiler.pop(this.getClass(), "getItemAsMap.misscache");
-
-                }
-            }
-            return cacheResult;
-        } catch (Exception ex) {
-            return null;
-        } finally {
-            profiler.pop(this.getClass(), "getItemAsMap");
+        List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
+            "SELECT id, username, name, type, joinDate FROM User WHERE id=?",
+            id
+        );
+        if (rows != null) {
+            return rows.get(0);
         }
 
+        return null;
     }
 
     @Override
-    public HashMap<String, Object> getItemAsMap(String s) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public HashMap<String, Object> getItemAsMap(String username) {
+        List<HashMap<String, Object>> rows = _userDao.selectAsListMap(
+            "SELECT id, username, name, type, joinDate FROM User WHERE username=?",
+            username
+        );
+        if (rows != null) {
+            return rows.get(0);
+        }
+
+        return null;
     }
 
     @Override
@@ -79,7 +64,7 @@ public class UserDal implements BaseDal {
     @Override
     public TI32Result addItemAutoKey(Object... params) {
         TI32Result result = _userDao.insert(
-            "INSERT INTO User VALUES(?,?,?,?)",
+            "INSERT INTO User VALUES(?,?,?,?,?)",
             true,
             params
         );
@@ -94,7 +79,7 @@ public class UserDal implements BaseDal {
     @Override
     public TI32Result addItem(Object... params) {
         TI32Result result = _userDao.insert(
-            "INSERT INTO User VALUES(?,?,?,?)",
+            "INSERT INTO User VALUES(?,?,?,?,?)",
             false,
             params
         );
@@ -108,7 +93,7 @@ public class UserDal implements BaseDal {
 
     @Override
     public TI32Result removeItem(int i) {
-        throw new UnsupportedOperationException("Can only cascade row removal from UserToken");
+        throw new UnsupportedOperationException("Can only cascade row removal from Token");
     }
 
     @Override
@@ -131,8 +116,6 @@ public class UserDal implements BaseDal {
         if (result.getError() != ECode.C_SUCCESS.getValue()) {
             LOGGER.error(result.getError());
             LOGGER.error(result.getExtData());
-        } else {
-            IntMapCache.INSTANCE.remove(id);
         }
 
         return result;

@@ -16,8 +16,8 @@ public class BaseCache<KType, VType> {
 
     private final GCacheWrapper<KType, VType> CACHE;
 
-    protected BaseCache() {
-        CACHE = new GCacheWrapper<>("config_info");
+    protected BaseCache(String instanceName) {
+        CACHE = new GCacheWrapper<>(instanceName);
     }
 
     public void put(KType key, VType value) {

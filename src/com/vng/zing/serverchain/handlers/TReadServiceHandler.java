@@ -6,11 +6,11 @@ package com.vng.zing.serverchain.handlers;
 
 import org.apache.thrift.TException;
 
-import com.vng.zing.thrift.resource.TReadService;
-import com.vng.zing.thrift.resource.TUserResult;
 import com.vng.zing.serverchain.model.TReadServiceModel;
 import com.vng.zing.stats.Profiler;
 import com.vng.zing.stats.ThreadProfiler;
+import com.vng.zing.thrift.resource.TReadService;
+import com.vng.zing.thrift.resource.TUserResult;
 
 /**
  *
@@ -31,4 +31,25 @@ public class TReadServiceHandler implements TReadService.Iface {
         }
     }
 
+    @Override
+    public TUserResult findById(int uId) throws TException {
+        ThreadProfiler profiler = Profiler.createThreadProfiler("TAuthenticatorHandler.authenticate", false);
+
+        try {
+            return TReadServiceModel.INSTANCE.findById(uId);
+        } finally {
+            Profiler.closeThreadProfiler();
+        }
+    }
+
+    @Override
+    public TUserResult findByUsername(String username) throws TException {
+        ThreadProfiler profiler = Profiler.createThreadProfiler("TAuthenticatorHandler.authenticate", false);
+
+        try {
+            return TReadServiceModel.INSTANCE.findByUsername(username);
+        } finally {
+            Profiler.closeThreadProfiler();
+        }
+    }
 }

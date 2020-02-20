@@ -38,7 +38,7 @@ public class TokenDal implements BaseDal {
         }
 
         List<HashMap<String, Object>> rows = _tokenDao.selectAsListMap(
-            "SELECT id, username, password FROM UserToken WHERE id=?",
+            "SELECT id, username, password FROM Token WHERE id=?",
             id
         );
         if (rows != null) {
@@ -55,7 +55,7 @@ public class TokenDal implements BaseDal {
 
     @Override
     public HashMap<String, Object> getItemAsMap(String username, String password) {
-        StringBuilder sql = new StringBuilder("SELECT id, username, password FROM UserToken WHERE username=?");
+        StringBuilder sql = new StringBuilder("SELECT id, username, password FROM Token WHERE username=?");
         List<HashMap<String, Object>> rows;
         if (!CommonUtils.isEmpty(password)) {
             sql.append(" AND password=?");
@@ -73,7 +73,7 @@ public class TokenDal implements BaseDal {
     @Override
     public TI32Result addItemAutoKey(Object... params) {
         TI32Result result = _tokenDao.insert(
-            "INSERT INTO UserToken(username, password) VALUES(?,?)",
+            "INSERT INTO Token(username, password) VALUES(?,?)",
             true,
             params
         );
@@ -88,7 +88,7 @@ public class TokenDal implements BaseDal {
     @Override
     public TI32Result addItem(Object... params) {
         TI32Result result = _tokenDao.insert(
-            "INSERT INTO UserToken(username, password) VALUES(?,?)",
+            "INSERT INTO Token(username, password) VALUES(?,?)",
             false,
             params
         );
@@ -103,7 +103,7 @@ public class TokenDal implements BaseDal {
     @Override
     public TI32Result removeItem(int id) {
         TI32Result result = _tokenDao.update(
-            "DELETE FROM UserToken WHERE id=?",
+            "DELETE FROM Token WHERE id=?",
             id
         );
         if (result.getError() != ECode.C_SUCCESS.getValue()) {
@@ -117,7 +117,7 @@ public class TokenDal implements BaseDal {
     @Override
     public TI32Result updateItem(int id, KVPair... pairs) {
         Object[] objects = new Object[pairs.length + 1];
-        StringBuilder sb = new StringBuilder("UPDATE UserToken SET ");
+        StringBuilder sb = new StringBuilder("UPDATE Token SET ");
         for (int i = 0; i < pairs.length; i++) {
             sb.append(pairs[i].getKey());
             sb.append("=?");

@@ -1,4 +1,4 @@
-namespace java com.vng.zing.resource.thrift
+namespace java com.vng.zing.thrift.resource
 
 // typedef i16 short;
 // typedef i32 int;
@@ -19,9 +19,10 @@ struct Token{
 
 struct User{
     1: optional i32 id;
-    2: optional string name;
-    3: optional UserType type;
-    4: optional string joinDate;
+    2: optional string username;
+    3: optional string name;
+    4: optional UserType type;
+    5: optional string joinDate;
 }
 
 struct TI32Result{
@@ -51,6 +52,8 @@ struct TUserResult{
 
 service TReadService{
     TUserResult authenticate(1: string username, 2: string password);
+    TUserResult findById(1: i32 uId);
+    TUserResult findByUsername(1: string username);
 }
 
 service TWriteService{

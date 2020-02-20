@@ -11,20 +11,20 @@ import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
 import com.vng.zing.media.common.utils.ServletUtils;
-import com.vng.zing.thrift.resource.TReadService;
-import com.vng.zing.thrift.resource.TUserResult;
 import com.vng.zing.serverchain.common.MessageGenerator;
 import com.vng.zing.serverchain.utils.Utils;
+import com.vng.zing.stats.Profiler;
+import com.vng.zing.stats.ThreadProfiler;
 import com.vng.zing.thrift.client.TClientPoolManager;
 import com.vng.zing.thrift.client.TReadServiceClient;
-import com.vng.zing.thriftpool.TClientFactory;
+import com.vng.zing.thrift.resource.TUserResult;
 import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
  * @author namnh16
  */
-public class HLoginModel extends BaseModel {
+public class HLoginModel extends HBaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HLoginModel.class);
     public static final HLoginModel INSTANCE = new HLoginModel();
@@ -35,74 +35,29 @@ public class HLoginModel extends BaseModel {
 
     @Override
     public void process(HttpServletRequest request, HttpServletResponse response) {
-//        ThreadProfiler profiler = Profiler.getThreadProfiler();
+        ThreadProfiler profiler = Profiler.getThreadProfiler();
+        profiler.push(this.getClass(), "HLoginModel");
+
         this.prepareHeaderHtml(response);
 
-        /* Switch to this block if servers are running on top of HTTPS
-        TSSLTransportFactory.TSSLTransportParameters params =
-            new TSSLTransportFactory.TSSLTransportParameters();
-        params.setTrustStore("src/main/resources/truststore.jks", "password");
-        
-        try (TTransport socket = TSSLTransportFactory.getClientSocket(
-                "localhost", 8090, 500000, params);
-            ) {
-            TBinaryProtocol binProto = new TBinaryProtocol(socket);
-            TMultiplexedProtocol mulProto = new TMultiplexedProtocol(
-                    binProto, "Authenticator"
-            );
-            
-            Authenticator.Client client = new Authenticator.Client(mulProto);
-            
-            User user = client.authenticate(
-                    request.getParameter("username"),
-                    request.getParameter("password")
-            );
-            
-            request.getSession(true).setAttribute("user", user);
-            
-            response.sendRedirect("/user/info");
-        } catch (InvalidTokenException ex){
-            try{
-                response.sendRedirect("/user/info");
-            }
-            catch(IOException ioEx){
-                _Logger.error(ioEx.getMessage(), ioEx);
-            }
-        } catch (TTransportException | DatabaseException ex) {
-            _Logger.error(ex.getMessage(), ex);
-        } catch (TException ex) {
-            _Logger.error(ex.getMessage(), ex);
-        }
-         */
         try {
-            TClientFactory clientFactory = new TClientFactory(
-                new TReadService.Client.Factory(),
-                this.getConnectionConfig("ReadService")
-            );
-            TReadService.Client readClient = (TReadService.Client) clientFactory.makeObject();
-            
-//            TReadServiceClient readClient = TClientPoolManager.getReadServiceClient();
+            String username = ServletUtils.getString(request, "username");
+            String encrPassword = Utils.md5(ServletUtils.getString(request, "password"));
 
-            String encrdPassword = Utils.md5(ServletUtils.getString(request, "password", ""));
-            TUserResult queryResult = readClient.authenticate(
-                ServletUtils.getString(request, "username", ""),
-                encrdPassword
-            );
-            if (queryResult.getError() != ECode.C_SUCCESS.getValue()) {
-                this.outAndClose(request, response, MessageGenerator.getMessage(queryResult.getError()));
-            } else {
+            TReadServiceClient readClient = TClientPoolManager.getReadServiceClient();
+            TUserResult queryResult = readClient.authenticate(username, encrPassword);
+
+            if (queryResult.getError() == ECode.C_SUCCESS.getValue()) {
                 request.getSession(true).setAttribute("user", queryResult.getValue());
                 response.sendRedirect("/user/info");
+            } else {
+                this.outAndClose(request, response, MessageGenerator.getMessage(queryResult.getError()));
             }
-
-//            clientFactory.destroyObject(client);
-
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
-
             this.outAndClose(request, response, MessageGenerator.getMessage(ECode.EXCEPTION));
         } finally {
-//            Profiler.closeThreadProfiler();
+            profiler.pop(this.getClass(), "HLoginModel");
         }
     }
 }

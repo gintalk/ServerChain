@@ -10,15 +10,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.thrift.resource.User;
 import com.vng.zing.serverchain.common.MessageGenerator;
+import com.vng.zing.stats.Profiler;
+import com.vng.zing.stats.ThreadProfiler;
+import com.vng.zing.thrift.resource.User;
 import com.vng.zing.zcommon.thrift.ECode;
 
 /**
  *
  * @author namnh16
  */
-public class HLogoutModel extends BaseModel {
+public class HLogoutModel extends HBaseModel {
 
     private static final Logger LOGGER = ZLogger.getLogger(HLogoutModel.class);
     public static final HLogoutModel INSTANCE = new HLogoutModel();
@@ -29,7 +31,9 @@ public class HLogoutModel extends BaseModel {
 
     @Override
     public void process(HttpServletRequest request, HttpServletResponse response) {
-//        ThreadProfiler profiler = Profiler.getThreadProfiler();
+        ThreadProfiler profiler = Profiler.getThreadProfiler();
+        profiler.push(this.getClass(), "HLogoutModel");
+
         this.prepareHeaderHtml(response);
 
         try {
@@ -42,11 +46,9 @@ public class HLogoutModel extends BaseModel {
             }
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
-
             this.outAndClose(request, response, MessageGenerator.getMessage(ECode.EXCEPTION));
-
         } finally {
-            //            Profiler.closeThreadProfiler();
+            profiler.pop(this.getClass(), "HLogoutModel");
         }
     }
 }

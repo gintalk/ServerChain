@@ -11,10 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-import com.vng.zing.configer.ZConfig;
 import com.vng.zing.logger.ZLogger;
-import com.vng.zing.thriftpool.TClientPoolConfig;
-import com.vng.zing.thriftserver.ThriftServers;
 
 /**
  * @Note: Class base model xử lý business chung & hàm tiện ích cho tất cả
@@ -22,23 +19,11 @@ import com.vng.zing.thriftserver.ThriftServers;
  *
  * @author namnq
  */
-public abstract class BaseModel {
+public abstract class HBaseModel {
 
-    private static final Logger _Logger = ZLogger.getLogger(BaseModel.class);
+    private static final Logger LOGGER = ZLogger.getLogger(HBaseModel.class);
 
     public abstract void process(HttpServletRequest req, HttpServletResponse resp);
-
-    protected TClientPoolConfig.ConnConfig getConnectionConfig(String serviceName) {
-        ThriftServers.Config config = new ThriftServers.Config();
-
-        config.host = ZConfig.Instance.getString(ThriftServers.class, serviceName, "host", "127.0.0.1");
-        config.port = ZConfig.Instance.getInt(ThriftServers.class, serviceName, "port", 8090);
-
-        return new TClientPoolConfig.ConnConfig(
-            config.host, config.port, config.framed, false, 50000,
-            config.maxFrameSize, config.encryptVersionPriority
-        );
-    }
 
     /**
      * outAndClose: print data to client
@@ -56,7 +41,7 @@ public abstract class BaseModel {
             out.print(content);
             result = true;
         } catch (Exception ex) {
-            _Logger.error(ex.getMessage() + " while processing URI \"" + req.getRequestURI() + "?" + req.getQueryString() + "\"", ex);
+            LOGGER.error(ex.getMessage() + " while processing URI \"" + req.getRequestURI() + "?" + req.getQueryString() + "\"", ex);
         } finally {
             if (out != null) {
                 out.close();
